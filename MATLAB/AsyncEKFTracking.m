@@ -1,0 +1,315 @@
+% Live LAB colour tracking to determine pose of Robotic Platform. 
+% OpenMV cameras send pixel coordinates of colour blobs to the EKF which
+% processes as incoming data as it is available 
+
+%% Load Camera Parameters
+% From EasyWand6 Camera Calibrator App
+clear, clc
+cameraData = load("demoSave_easyWand6Data.mat", "ew6Save");
+numCams = cameraData.ew6Save.data.numCams;
+
+% Camera Intrinsics matrices as a 3x3xN array
+cameraIntrinsics = cameraData.ew6Save.data.intrinsics;
+fx = arrayfun(@(c) c.FocalLength(1), cameraIntrinsics);
+fy = arrayfun(@(c) c.FocalLength(2), cameraIntrinsics);
+ox = arrayfun(@(c) c.PrincipalPoint(1), cameraIntrinsics);
+oy = arrayfun(@(c) c.PrincipalPoint(2), cameraIntrinsics);
+cams_K = zeros(3, 3, numCams);
+cams_K(1,1,:) = fx;
+cams_K(2,2,:) = fy;
+cams_K(1,3,:) = ox;
+cams_K(2,3,:) = oy;
+cams_K(3,3,:) = 1;
+
+% Camera Extrinsics matrices
+cameraExtrinsics = cameraData.ew6Save.data.extrinsics;
+% Rotation of camera in world frame as a 3x3xn array
+cams_R = cat(3, cameraExtrinsics.poses{:});       % 3x3xN
+% TRanslation of camera in world frame as a 3x1xN array
+cams_t = reshape(cat(2, cameraExtrinsics.positions{:}), 3, 1, []);  % 3x1xN
+
+%% Marker Geometry
+num_features = 4;
+% Feature Coordinates in body frame
+
+
+%% Connect To Cameras for live streaming
+Local_Port = 7007; % Ports 0-1023 are reserved for system services 
+TimeOut = 0.01; 
+u = udpport("datagram", "LocalPort", Local_Port, "Timeout", TimeOut)
+uv =
+num_measurements = num_cams*num_features*2;
+
+%% EKF 
+% incremetal count
+k=0; 
+% [Px; Py; Pz; Vx; Vy; Vz; q0; qx; qy; qz; omegax; omegay; omegaz]
+if k == 0
+    Pos_init = [2.6; 0; 0.5];
+    V_init = [0; 0.4; 0];        % Initial velocity 
+    q_init = [0.707107; 0; 0; 0.707107];
+    omega_init = [0; 0.6667 ;0];   % Body omega
+    x_est = [Pos_init;V_init;q_init;omega_init];  
+
+    % Initialize state error covariance
+    P_est = diag([0.05*ones(1,3), ... 
+                 0.005*ones(1,3), ... 
+                 0.005*ones(1,4), ... 
+                 0.005*ones(1,3)]);
+else
+    x_est = x_k;
+    P_est = P_k;
+end
+% Process noise Covariance
+Amax = 0.2; % m/s^2, max acceleration
+eA = Amax/sqrt(3)*ones(1,3); %std dev of a uniform distribution
+alpha_max = 0.05; % maximum angular acceleration
+ealpha = alpha_max/sqrt(3)*ones(1,3);  %std dev of a uniform distribution
+Q = diag([eA,ealpha]); %scale by process noise jacobian 
+G = [zeros(3,6); %position: no direct noise
+     dt*eye(3), zeros(3); % velocity: acceleration noise
+     zeros(4,6); % quaternion: no direct noise
+     zeros(3), dt*eye(3)]; %angular velocity: angular acceleration noise 
+Qk = G*Q*G';
+
+%Measurement Noise Covariance 
+pixel_std = 7; %std dev of a uniform distribution 
+
+%Predict
+x_pred = state_transition(x_est,dt); %a priori state
+
+%State Transition Jacobian
+A_k = compute_StateJacobian(x_pred, dt);
+
+P_pred = A_k*P_est*A_k' + Qk; 
+
+%Update 
+z = zeros(num_measurements,1); % measurement vector 24x1 for 3 cams
+for cam_idx = 1:num_cams
+    for feat_idx = 1:num_features
+        meas_idx = (cam_idx -1)*num_features*2 + (feat_idx-1)*2 +1;
+        uv_row_start = (cam_idx - 1) * 4 + 1;
+        uv_row_end = cam_idx * 4;
+        cam_uv = uv(uv_row_start:uv_row_end, :); % 4x2
+        z(meas_idx) = cam_uv(feat_idx,1); %u
+        z(meas_idx+1) = cam_uv(feat_idx,2); %v
+    end
+end
+
+vis_idx = find(~isnan(z)); 
+z_k = z(vis_idx); 
+[h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cams_t, num_cams, num_features, vis_idx);
+
+
+R_k = R_full(vis_idx, vis_idx);
+
+y_k = z_k - h_k; %measurement residual 
+    
+S_k = H_k*P_pred*H_k' + R_k;
+KG_k = (P_pred*H_k') / S_k;
+x_k = x_pred + KG_k*y_k; %posteriori state update equation
+
+q_norm = norm(x_k(7:10));
+x_est(7:10) = x_k(7:10) / q_norm;
+
+I_KH = eye(num_states) - KG_k * H_k; 
+P_est = I_KH * P_pred*I_KH' +KG_k*R_k*KG_k'; %Posteriori process covariance in Joseph form 
+
+
+%f(x_pred)
+function x_next = state_transition(x_current, dt)
+    x_next = zeros(13,1);
+    P = x_current(1:3);
+    V = x_current(4:6);
+    q = x_current(7:10);
+    w = x_current(11:13);
+
+    x_next(1:3) = P + V * dt; %position update
+    x_next(4:6) = V; %constant velocity assumption
+    w_norm = norm(w); %quaternion update
+    if w_norm > 0 
+        axis = w / w_norm;
+        angle = w_norm * dt;
+        delta_q = [cos(angle/2); axis*sin(angle/2)];
+        x_next(7:10) = quatmultiply(q', delta_q')'; %body frame ang velocity
+    else
+        x_next(7:10) = q; %No rotation if omega is zero
+    end
+
+    q_norm = norm(x_next(7:10));
+    if q_norm > 0
+        x_next(7:10) = x_next(7:10) / q_norm;
+    else
+        x_next(7:10) = [1; 0; 0; 0]; 
+    end
+    x_next(11:13) = w; %constant angular velocity assumption
+end
+
+% Calculate the state transition Jacobian
+function A_k = compute_StateJacobian(x_pred, dt)
+    A_k = eye(13);
+    q0 = x_pred(7); 
+    qx = x_pred(8); 
+    qy = x_pred(9); 
+    qz = x_pred(10);
+    wx = x_pred(11); 
+    wy = x_pred(12); 
+    wz = x_pred(13);
+
+    %Position depends on velocity
+    A_k(1:3, 4:6) = dt*eye(3);
+    %Quaternion depends of prev quat dq/dq
+    A_k(7,8:10) = [-dt*wx/2, -dt*wy/2, -dt*wz/2];
+    A_k(8,7) = dt*wx/2;
+    A_k(8,9) = dt*wz/2;
+    A_k(8,10) = -dt*wy/2;
+    A_k(9, 7) = dt*wy/2;  
+    A_k(9, 8) = -dt*wz/2;  
+    A_k(9, 10) = dt*wx/2;
+    A_k(10, 7) = dt*wz/2; 
+    A_k(10, 8) = dt*wy/2;  
+    A_k(10, 9) = -dt*wx/2;
+    %Quarternion depends on ang vel. dq/dw
+    A_k(7, 11:13) = [-dt*qx/2, -dt*qy/2, -dt*qz/2];
+    A_k(8, 11:13) = [dt*q0/2, -dt*qz/2, dt*qy/2];
+    A_k(9, 11:13) = [dt*qz/2, dt*q0/2, -dt*qx/2];
+    A_k(10, 11:13) = [-dt*qy/2, dt*qx/2, dt*q0/2];
+end
+
+% Calculate the measurement function h(x) and the measurement Jacobian H(x)
+function [h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cams_t, num_cams, num_features, vis_idx)
+    
+    P = x_pred(1:3);     %Position states
+    q = x_pred(7:10);    %Quaternion state 
+    
+    % R_uav = quat2rotm(q'); % Convert quaternion to rotation matrix
+    num_meas = num_cams*num_features*2; % 2 cameras × 2 coords (u,v) × features
+    
+    h_full = zeros(num_meas, 1);
+    H_full = zeros(num_meas, 13); 
+
+    for cam_idx = 1:num_cams
+        % Row indices for this camera
+        row_start = (cam_idx - 1) * 3 + 1;
+        row_end = cam_idx * 3;
+        
+        % Extract camera parameters
+        cam_K = cams_K(row_start:row_end, :);    % 3x3
+        cam_R = cams_R(row_start:row_end, :);    % 3x3: UE world to UE camera
+        cam_t = cams_t(row_start:row_end);       % 3x1: UE world to UE camera
+        %transform to openCV cam coord convention from UE world
+        % R_ue2cv = [0   1   0;  % openCV x = right, UE y = right 
+        %            0   0  -1;  % openCV y = down, UE z = up
+        %            1   0   0]; % openCV z = forward, UE x = forward
+        
+
+        %MATLAB to intrisic coord transform
+        R_rh2cv = [0   -1   0;  % camIntrin x = right, RH y = left
+                   0    0  -1;  % camIntrin y = down, RH z = up
+                   1    0   0]; % camIntrin z = forwards, RH x= forward
+
+        R_w2cv = R_rh2cv*cam_R;
+        t_w2cv = -R_w2cv*cam_t;
+
+        % R_c2w = R_w2cv'; % camera to world (rotation of W wrt C)
+        % t_c2w = -R_c2w*t_w2cv; % camera to world pure translation 
+
+        M_ext = [R_w2cv, t_w2cv; 0 0 0 1]; % extrinsics: camera to world 
+        M_int = [cam_K, zeros(3,1)]; %intrisics:camera to pixel
+        
+        for feature_idx = 1:num_features
+            %From feature body frame to world frame
+            U_bi = body_coords(:, feature_idx); % Body frame coordinates wrt centroid (RGBY order)
+            
+            point_quat = [0; U_bi(1); U_bi(2); U_bi(3)]; % Convert to pure quaternion and rotate
+            q_conj = [q(1); -q(2:4)];
+            
+            % q * point_quat * q_conj
+            temp = quatmultiply(q', point_quat');
+            rotated = quatmultiply(temp, q_conj');
+
+            P_world = rotated(2:4)'+P; %Features in world MATLAB RH frame 
+            P_cam = M_ext* [P_world; 1]; % homogenous coords of features in camera frame
+
+            UVW = M_int*P_cam; %homog coords camera to image plane
+            u = UVW(1)/UVW(3);
+            v = UVW(2)/UVW(3);
+                    
+            meas_idx = (cam_idx - 1) * num_features * 2 + (feature_idx - 1) * 2 + 1;
+            u_idx = meas_idx;
+            v_idx = meas_idx + 1;
+            
+            % Store measurements
+            h_full(u_idx) = u;
+            h_full(v_idx) = v;
+
+            % Compute Measurement Jacobian
+
+            %Transform to camera coordinate frame 
+            X_cam = P_cam(1);
+            Y_cam = P_cam(2);
+            Z_cam = P_cam(3);
+
+            fx = cam_K(1,1);
+            fy = cam_K(2,2);
+
+            %Projection Jacobian: dPixel/dCameraCoord
+            dpix_dC = [fx/Z_cam, 0, -fx*X_cam/(Z_cam^2); % du/dx,du/dy,du/dz
+                         0, fy/Z_cam, -fy*Y_cam/(Z_cam^2)]; %dv/dx,dv/dy,dv/dz
+            
+            dPc_dPw= R_w2cv;%cam.R;%dCam/dWorld
+
+            dPw_dq = compute_dPw_dq(q, U_bi); %dworld/dquat
+
+            dproj_dPw = dpix_dC * dPc_dPw; % dpix/dCam*dCam/dWorld 
+
+            %Chain rule -> position Jacobian
+            dproj_dP = dproj_dPw; % dworld/dPosition = identity matrix 
+            
+            % Quaternion Jacobian (columns 7-10)
+            dproj_dq= dproj_dPw * dPw_dq; % 2x4
+
+            % Fill Jacobian matrix
+            H_full(u_idx, 1:3) = dproj_dP(1, :); %Position 
+            H_full(u_idx, 7:10) = dproj_dq(1, :); %Quat
+            H_full(v_idx, 1:3) = dproj_dP(2, :); %Position
+            H_full(v_idx, 7:10) = dproj_dq(2, :); %Quat 
+        end
+    end
+    h_k = h_full(vis_idx);
+    H_k = H_full(vis_idx, :);
+end
+
+% World point w.r.t. quaternion
+function dPw_dq = compute_dPw_dq(q, U_bi)    
+    q0 = q(1); 
+    qx = q(2); 
+    qy = q(3); 
+    qz = q(4);
+    ux = U_bi(1); %x-coords of body features
+    uy = U_bi(2); 
+    uz = U_bi(3);
+    
+    dPw_dq = zeros(3, 4);
+    
+    %dPw/q0 -> derivate of quat in world frame of body coordinates
+    dPw_dq(:,1) = 2*[2*q0*ux + qy*uz - qz*uy;
+                     2*q0*uy - qx*uz + qz*ux;
+                     2*q0*uz + qx*uy - qy*ux];
+    
+    %dPw/qx
+    dPw_dq(:,2) = 2*[2*qx*ux + qy*uy + qz*uz;
+                     qy*ux - q0*uz;
+                     qz*ux + q0*uy];
+    
+    %dPw/qy
+    dPw_dq(:,3) = 2*[qx*uy + q0*uz;
+                     qx*ux + 2*qy*uy + qz*uz;
+                     qz*uy - q0*ux];
+    
+    %dPw/dqz
+    dPw_dq(:,4) = 2*[- q0*uy + qx*uz;
+                     q0*ux + qy*uz;
+                     qx*ux + qy*uy + 2*qz*uz];
+end
+%% Send to GUI for live streaming
