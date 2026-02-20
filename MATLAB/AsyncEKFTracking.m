@@ -35,31 +35,35 @@ num_features = 4;
 
 %% Connect To Cameras for live streaming
 Local_Port = 7007; % Ports 0-1023 are reserved for system services 
-TimeOut = 0.01; 
-u = udpport("datagram", "LocalPort", Local_Port, "Timeout", TimeOut)
-uv =
+TimeOut = 0.01; %seconds 
+runDuration = 180; %seconds
+u = udpport("datagram", "LocalPort", Local_Port, "Timeout", TimeOut);
+
+latestUV = nan(numCams, num_features, 2);
+latestsTimeSent = nan(numCams, 1); % Time stamp from the camera clock
+timeReceived = nan(numCams, 1); % Matlab time of recieval 
 num_measurements = num_cams*num_features*2;
 
 %% EKF 
-% incremetal count
-k=0; 
-% [Px; Py; Pz; Vx; Vy; Vz; q0; qx; qy; qz; omegax; omegay; omegaz]
-if k == 0
-    Pos_init = [2.6; 0; 0.5];
-    V_init = [0; 0.4; 0];        % Initial velocity 
-    q_init = [0.707107; 0; 0; 0.707107];
-    omega_init = [0; 0.6667 ;0];   % Body omega
-    x_est = [Pos_init;V_init;q_init;omega_init];  
+tic;
+packetCount = 0;
+k=0; % incremetal count
 
-    % Initialize state error covariance
-    P_est = diag([0.05*ones(1,3), ... 
-                 0.005*ones(1,3), ... 
-                 0.005*ones(1,4), ... 
-                 0.005*ones(1,3)]);
-else
-    x_est = x_k;
-    P_est = P_k;
-end
+% [Px; Py; Pz; Vx; Vy; Vz; q0; qx; qy; qz; omegax; omegay; omegaz]
+Pos_init = [2.6; 0; 0.5];
+V_init = [0; 0.4; 0];        % Initial velocity 
+q_init = [0.707107; 0; 0; 0.707107];
+omega_init = [0; 0.6667 ;0];   % Body omega
+x_est = [Pos_init;V_init;q_init;omega_init];  
+
+% Initialize state error covariance
+P_est = diag([0.05*ones(1,3), ... 
+             0.005*ones(1,3), ... 
+             0.005*ones(1,4), ... 
+             0.005*ones(1,3)]);
+
+while
+
 % Process noise Covariance
 Amax = 0.2; % m/s^2, max acceleration
 eA = Amax/sqrt(3)*ones(1,3); %std dev of a uniform distribution
