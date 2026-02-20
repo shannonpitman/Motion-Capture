@@ -7,16 +7,13 @@
 clear, clc
 cameraData = load("demoSave_easyWand6Data.mat", "ew6Save");
 numCams = cameraData.ew6Save.data.numCams;
+
+% Camera Intrinsics matrices as a 3x3xN array
 cameraIntrinsics = cameraData.ew6Save.data.intrinsics;
 fx = arrayfun(@(c) c.FocalLength(1), cameraIntrinsics);
 fy = arrayfun(@(c) c.FocalLength(2), cameraIntrinsics);
 ox = arrayfun(@(c) c.PrincipalPoint(1), cameraIntrinsics);
 oy = arrayfun(@(c) c.PrincipalPoint(2), cameraIntrinsics);
-cameraExtrinsics = cameraData.ew6Save.data.extrinsics;
-cameraRotation = arrayfun(@(c) c.poses, cameraExtrinsics);
-cameraTranslation = arrayfun(@(c) c.positions, cameraExtrinsics);
-
-% Build all K matrices at once as a 3x3xN array
 cams_K = zeros(3, 3, numCams);
 cams_K(1,1,:) = fx;
 cams_K(2,2,:) = fy;
@@ -24,7 +21,12 @@ cams_K(1,3,:) = ox;
 cams_K(2,3,:) = oy;
 cams_K(3,3,:) = 1;
 
-cams_R = zeros
+% Camera Extrinsics matrices
+cameraExtrinsics = cameraData.ew6Save.data.extrinsics;
+% Rotation of camera in world frame as a 3x3xn array
+cams_R = cat(3, cameraExtrinsics.poses{:});       % 3x3xN
+% TRanslation of camera in world frame as a 3x1xN array
+cams_t = reshape(cat(2, cameraExtrinsics.positions{:}), 3, 1, []);  % 3x1xN
 
 %% Marker Geometry
 num_features = 4;
@@ -32,85 +34,105 @@ num_features = 4;
 
 
 %% Connect To Cameras for live streaming
-udp 
-uv =
+Local_Port = 7007; % Ports 0-1023 are reserved for system services 
+TimeOut = 0.01; %seconds 
+runDuration = 180; %seconds
+u = udpport("datagram", "LocalPort", Local_Port, "Timeout", TimeOut);
+
+latestUV = nan(numCams, num_features, 2);
+latestsTimeSent = nan(numCams, 1); % Time stamp from the camera clock
+timeReceived = nan(numCams, 1); % Matlab time of recieval 
 num_measurements = num_cams*num_features*2;
 
 %% EKF 
-% incremetal count
-k=0; 
-% [Px; Py; Pz; Vx; Vy; Vz; q0; qx; qy; qz; omegax; omegay; omegaz]
-if k == 0
-    Pos_init = [2.6; 0; 0.5];
-    V_init = [0; 0.4; 0];        % Initial velocity 
-    q_init = [0.707107; 0; 0; 0.707107];
-    omega_init = [0; 0.6667 ;0];   % Body omega
-    x_est = [Pos_init;V_init;q_init;omega_init];  
+tic;
+packetCount = 0;
+k=0; % incremetal count
 
-    % Initialize state error covariance
-    P_est = diag([0.05*ones(1,3), ... 
-                 0.005*ones(1,3), ... 
-                 0.005*ones(1,4), ... 
-                 0.005*ones(1,3)]);
-else
-    x_est = x_k;
-    P_est = P_k;
-end
-% Process noise Covariance
-Amax = 0.2; % m/s^2, max acceleration
-eA = Amax/sqrt(3)*ones(1,3); %std dev of a uniform distribution
-alpha_max = 0.05; % maximum angular acceleration
-ealpha = alpha_max/sqrt(3)*ones(1,3);  %std dev of a uniform distribution
-Q = diag([eA,ealpha]); %scale by process noise jacobian 
-G = [zeros(3,6); %position: no direct noise
-     dt*eye(3), zeros(3); % velocity: acceleration noise
-     zeros(4,6); % quaternion: no direct noise
-     zeros(3), dt*eye(3)]; %angular velocity: angular acceleration noise 
-Qk = G*Q*G';
+num_states = 13; % [Px; Py; Pz; Vx; Vy; Vz; q0; qx; qy; qz; omegax; omegay; omegaz]
+Pos_init = [2.6; 0; 0.5];
+V_init = [0; 0.4; 0];        % Initial velocity 
+q_init = [0.707107; 0; 0; 0.707107];
+omega_init = [0; 0.6667 ;0];   % Body omega
+
+x_est = [Pos_init;V_init;q_init;omega_init];  
+
+% Initialize state error covariance
+P_est = diag([0.05*ones(1,3), ... 
+             0.005*ones(1,3), ... 
+             0.005*ones(1,4), ... 
+             0.005*ones(1,3)]);
 
 %Measurement Noise Covariance 
 pixel_std = 7; %std dev of a uniform distribution 
+R_full = diag((pixel_std^2) * ones(num_measurements, 1));
 
-%Predict
-x_pred = state_transition(x_est,dt); %a priori state
-
-%State Transition Jacobian
-A_k = compute_StateJacobian(x_pred, dt);
-
-P_pred = A_k*P_est*A_k' + Qk; 
-
-%Update 
-z = zeros(num_measurements,1); % measurement vector 24x1 for 3 cams
-for cam_idx = 1:num_cams
-    for feat_idx = 1:num_features
-        meas_idx = (cam_idx -1)*num_features*2 + (feat_idx-1)*2 +1;
-        uv_row_start = (cam_idx - 1) * 4 + 1;
-        uv_row_end = cam_idx * 4;
-        cam_uv = uv(uv_row_start:uv_row_end, :); % 4x2
-        z(meas_idx) = cam_uv(feat_idx,1); %u
-        z(meas_idx+1) = cam_uv(feat_idx,2); %v
+t_last = toc;
+while toc < runDuration
+    while u.NumDatagramsAvailable > 0
+        data = read(u,1,"uint8");
+        packetCount = packetCount +1;
     end
-end
 
-vis_idx = find(~isnan(z)); 
-z_k = z(vis_idx); 
-[h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cams_t, num_cams, num_features, vis_idx);
+    t_now = toc;
+    dt = t_now - t_last;
+    t_last = t_now; % Update the last time for the next iteration
+    k = k +1;
 
-
-R_k = R_full(vis_idx, vis_idx);
-
-y_k = z_k - h_k; %measurement residual 
+    % Process noise Covariance
+    Amax = 0.2; % m/s^2, max acceleration
+    eA = Amax/sqrt(3)*ones(1,3); %std dev of a uniform distribution
+    alpha_max = 0.05; % maximum angular acceleration
+    ealpha = alpha_max/sqrt(3)*ones(1,3);  %std dev of a uniform distribution
+    Q = diag([eA,ealpha]); %scale by process noise jacobian 
+    G = [zeros(3,6); %position: no direct noise
+         dt*eye(3), zeros(3); % velocity: acceleration noise
+         zeros(4,6); % quaternion: no direct noise
+         zeros(3), dt*eye(3)]; %angular velocity: angular acceleration noise 
+    Qk = G*Q*G';
     
-S_k = H_k*P_pred*H_k' + R_k;
-KG_k = (P_pred*H_k') / S_k;
-x_k = x_pred + KG_k*y_k; %posteriori state update equation
+    %Predict
+    x_pred = state_transition(x_est,dt); %a priori state
+    
+    %State Transition Jacobian
+    A_k = compute_StateJacobian(x_pred, dt);
+    
+    P_pred = A_k*P_est*A_k' + Qk; 
+    
+    %Update 
+    z = zeros(num_measurements,1); % measurement vector 24x1 for 3 cams
+    for cam_idx = 1:num_cams
+        for feat_idx = 1:num_features
+            meas_idx = (cam_idx -1)*num_features*2 + (feat_idx-1)*2 +1;
+            uv_row_start = (cam_idx - 1) * 4 + 1;
+            uv_row_end = cam_idx * 4;
+            cam_uv = uv(uv_row_start:uv_row_end, :); % 4x2
+            z(meas_idx) = cam_uv(feat_idx,1); %u
+            z(meas_idx+1) = cam_uv(feat_idx,2); %v
+        end
+    end
+    
+    vis_idx = find(~isnan(z)); 
+    z_k = z(vis_idx); 
+    [h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cams_t, num_cams, num_features, vis_idx);
+    
+    
+    R_k = R_full(vis_idx, vis_idx);
+    
+    y_k = z_k - h_k; %measurement residual 
+        
+    S_k = H_k*P_pred*H_k' + R_k;
+    KG_k = (P_pred*H_k') / S_k;
+    x_k = x_pred + KG_k*y_k; %posteriori state update equation
+    
+    q_norm = norm(x_k(7:10));
+    x_k(7:10) = x_k(7:10) / q_norm;
+    
+    I_KH = eye(num_states) - KG_k * H_k; 
+    x_est = x_k;
+    P_est = I_KH * P_pred*I_KH' +KG_k*R_k*KG_k'; %Posteriori process covariance in Joseph form 
 
-q_norm = norm(x_k(7:10));
-x_est(7:10) = x_k(7:10) / q_norm;
-
-I_KH = eye(num_states) - KG_k * H_k; 
-P_est = I_KH * P_pred*I_KH' +KG_k*R_k*KG_k'; %Posteriori process covariance in Joseph form 
-
+end
 
 %f(x_pred)
 function x_next = state_transition(x_current, dt)
