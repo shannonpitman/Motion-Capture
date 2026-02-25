@@ -1,29 +1,39 @@
 # This work is licensed under the MIT license.
 # Copyright (c) 2013-2025 OpenMV LLC. All rights reserved.
 # https://github.com/openmv/openmv/blob/master/LICENSE
-#
-# Hello World Example
-#
-# Welcome to the OpenMV IDE! Click on the green run arrow button below to run the script!
 
 import sensor
 import time
+from machine import RTC
+import struct
+import sys
+
+CAM_ID = 1  # unique ID per camera
+sentinel = 65535
 
 # Colour Tracking Thresholds
 redThreshold = (30, 48, 26, 56, 16, 48)
 greenThreshold = (19, 62, -36, -27, -8, 14)
+# blueThreshold =
+# yellowThreshold =
 
 thresholds = [redThreshold, greenThreshold]
 colors = [(255, 0, 0), (0, 255, 0)]
+num_features = len(thresholds)
 
 # Init Cam
 sensor.reset()  # Reset and initialize the sensor.
 sensor.set_pixformat(sensor.RGB565)  # Set pixel format to RGB565 (or GRAYSCALE)
-sensor.set_framesize(sensor.VGA)  # Set frame size to QVGA (320x240)
+sensor.set_framesize(sensor.VGA)  # Set frame size to VGA (640x480)
 sensor.skip_frames(time=2000)  # Wait for settings take effect.
 sensor.set_auto_gain(False)  # Disable auto gain for colour tracking
 sensor.set_auto_whitebal(False)  # Disable auto white balance
 clock = time.clock()  # Create a clock object to track the FPS.
+
+rtc = RTC()  # initialises the RTC time and date -> will keep the time until power is completely lost by the system
+rtc.init((2026, 2, 25, 11, 7, 0, 0, 0))  # (year, month, day, hour, minute, second, weekday, yearday)
+
+
 
 while True:
     clock.tick()  # Update the FPS clock.
