@@ -14,7 +14,7 @@ sentinel = 65535
 # Colour Tracking Thresholds
 redThreshold = (30, 48, 26, 56, 16, 48)
 greenThreshold = (19, 62, -36, -27, -8, 14)
-blueThreshold = (50, 80, 50, 80, 50, 80)
+blueThreshold = (33, 74, 85, 117, 90, 140)
 yellowThreshold = (82, 156, 69, 154, 41, 74)
 
 thresholds = [redThreshold, greenThreshold, blueThreshold, yellowThreshold]
@@ -35,7 +35,7 @@ sensor.set_auto_whitebal(False)  # Disable auto white balance
 clock = time.clock()  # Create a clock object to track the FPS.
 
 rtc = RTC()  # initialises the RTC time and date -> will keep the time until power is completely lost by the system
-rtc.datetime((2026, 2, 25, 1, 12, 0, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
+rtc.datetime((2026, 2, 25, 3, 15, 45, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
 # weekday: 0=Mon...6=Sun, subsecond: hardware-dependent countdown
 print(rtc.datetime())
 
@@ -134,3 +134,6 @@ while True:
     # Send packet every frame
     pack_and_send(CAM_ID, timestamp, features_uv)
     print(clock.fps())  # Note: OpenMV Cam runs about half as fast when connected
+    # DEBUG: Uncomment the next 2 lines to verify in IDE, then re-comment before saving to cam
+    for i, uv in enumerate(features_uv):
+        print(f"{'RGBY'[i]}: {uv}")
