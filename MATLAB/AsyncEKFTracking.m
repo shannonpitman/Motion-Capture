@@ -31,7 +31,7 @@ cams_t = reshape(cat(2, cameraExtrinsics.positions{:}), 3, 1, []);  % 3x1xN
 %% Marker Geometry
 num_features = 4;
 % Feature Coordinates in body frame
-
+body_coords =[];
 
 %% Connect To Cameras for live streaming
 Local_Port = 7007; % Ports 0-1023 are reserved for system services 
