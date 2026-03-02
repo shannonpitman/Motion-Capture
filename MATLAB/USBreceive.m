@@ -24,9 +24,7 @@ featureNames = {'Red', 'Green', 'Blue', 'Yellow'};
 % Serial port names — update these for your system
 % Windows: check Device Manager -> Ports (COM & LPT)
 %   Look for "USB Serial Device" after plugging in each camera
-% Mac: ls /dev/tty.usbmodem*
-% Linux: ls /dev/ttyACM*
-portNames = ["COM3", "COM4"];   % <-- UPDATE THESE
+portNames = ["COM3", "COM6"];   
 BAUD_RATE = 115200;
 
 %% Open Serial Ports
