@@ -29,12 +29,14 @@ sensor.reset()  # Reset and initialize the sensor.
 sensor.set_pixformat(sensor.RGB565)  # Set pixel format to RGB565 (or GRAYSCALE)
 sensor.set_framesize(sensor.QVGA)  # Set frame size to QVGA, (320 x240) VGA = (640x480)
 sensor.skip_frames(time=2000)  # Wait for settings take effect
+sensor.skip_frames(time=2000)  # Wait for settings take effect.
 sensor.set_auto_gain(False)  # Disable auto gain for colour tracking
 sensor.set_auto_whitebal(False)  # Disable auto white balance
 clock = time.clock()  # Create a clock object to track the FPS.
 
 rtc = RTC()  # initialises the RTC time and date -> will keep the time until power is completely lost by the system
 rtc.datetime((2026, 3, 2, 0, 10, 5, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
+rtc.datetime((2026, 2, 25, 3, 15, 45, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
 # weekday: 0=Mon...6=Sun, subsecond: hardware-dependent countdown
 # print(rtc.datetime())
 
@@ -47,8 +49,9 @@ _ticks_at_second = time.ticks_ms()
 ROIsize = 100  # pixels
 frameW = sensor.width()
 frameH = sensor.height()
-lastUV = [None]*num_features
-lostCount = [0]*num_features
+
+lastUV = [None]*numColours
+lostCount = [0]*numColours
 maxLostFrames = 5
 
 def get_timestamp():
@@ -144,7 +147,6 @@ while True:
                 ys.append(roi[1])
                 xe.append(roi[0] + roi[2])
                 ye.append(roi[1] + roi[3])
-
         roi = (min(xs), min(ys), max(xe)-min(xs), max(ye)-min(ys))
     else:
         roi = None  # full frame

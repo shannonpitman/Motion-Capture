@@ -31,7 +31,7 @@ cams_t = reshape(cat(2, cameraExtrinsics.positions{:}), 3, 1, []);  % 3x1xN
 %% Marker Geometry
 num_features = 4;
 % Feature Coordinates in body frame
-
+body_coords =[];
 
 %% Connect To Cameras for live streaming
 Local_Port = 7007; % Ports 0-1023 are reserved for system services 
@@ -49,11 +49,12 @@ tic;
 packetCount = 0;
 k=0; % incremetal count
 
-% [Px; Py; Pz; Vx; Vy; Vz; q0; qx; qy; qz; omegax; omegay; omegaz]
+num_states = 13; % [Px; Py; Pz; Vx; Vy; Vz; q0; qx; qy; qz; omegax; omegay; omegaz]
 Pos_init = [2.6; 0; 0.5];
 V_init = [0; 0.4; 0];        % Initial velocity 
 q_init = [0.707107; 0; 0; 0.707107];
 omega_init = [0; 0.6667 ;0];   % Body omega
+
 x_est = [Pos_init;V_init;q_init;omega_init];  
 
 % Initialize state error covariance
@@ -62,63 +63,82 @@ P_est = diag([0.05*ones(1,3), ...
              0.005*ones(1,4), ... 
              0.005*ones(1,3)]);
 
-while
-
-% Process noise Covariance
-Amax = 0.2; % m/s^2, max acceleration
-eA = Amax/sqrt(3)*ones(1,3); %std dev of a uniform distribution
-alpha_max = 0.05; % maximum angular acceleration
-ealpha = alpha_max/sqrt(3)*ones(1,3);  %std dev of a uniform distribution
-Q = diag([eA,ealpha]); %scale by process noise jacobian 
-G = [zeros(3,6); %position: no direct noise
-     dt*eye(3), zeros(3); % velocity: acceleration noise
-     zeros(4,6); % quaternion: no direct noise
-     zeros(3), dt*eye(3)]; %angular velocity: angular acceleration noise 
-Qk = G*Q*G';
-
 %Measurement Noise Covariance 
 pixel_std = 7; %std dev of a uniform distribution 
+R_full = diag((pixel_std^2) * ones(num_measurements, 1));
 
-%Predict
-x_pred = state_transition(x_est,dt); %a priori state
-
-%State Transition Jacobian
-A_k = compute_StateJacobian(x_pred, dt);
-
-P_pred = A_k*P_est*A_k' + Qk; 
-
-%Update 
-z = zeros(num_measurements,1); % measurement vector 24x1 for 3 cams
-for cam_idx = 1:num_cams
-    for feat_idx = 1:num_features
-        meas_idx = (cam_idx -1)*num_features*2 + (feat_idx-1)*2 +1;
-        uv_row_start = (cam_idx - 1) * 4 + 1;
-        uv_row_end = cam_idx * 4;
-        cam_uv = uv(uv_row_start:uv_row_end, :); % 4x2
-        z(meas_idx) = cam_uv(feat_idx,1); %u
-        z(meas_idx+1) = cam_uv(feat_idx,2); %v
+t_last = toc;
+while toc < runDuration
+    while u.NumDatagramsAvailable > 0
+        data = read(u,1,"uint8");
+        packetCount = packetCount +1;
     end
-end
 
-vis_idx = find(~isnan(z)); 
-z_k = z(vis_idx); 
-[h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cams_t, num_cams, num_features, vis_idx);
+    t_now = toc;
+    dt = t_now - t_last;
+    t_last = t_now; % Update the last time for the next iteration
+    k = k +1;
 
-
-R_k = R_full(vis_idx, vis_idx);
-
-y_k = z_k - h_k; %measurement residual 
+    % Process noise Covariance
+    Amax = 0.2; % m/s^2, max acceleration
+    eA = Amax/sqrt(3)*ones(1,3); %std dev of a uniform distribution
+    alpha_max = 0.05; % maximum angular acceleration
+    ealpha = alpha_max/sqrt(3)*ones(1,3);  %std dev of a uniform distribution
+    Q = diag([eA,ealpha]); %scale by process noise jacobian 
+    G = [zeros(3,6); %position: no direct noise
+         dt*eye(3), zeros(3); % velocity: acceleration noise
+         zeros(4,6); % quaternion: no direct noise
+         zeros(3), dt*eye(3)]; %angular velocity: angular acceleration noise 
+    Qk = G*Q*G';
     
-S_k = H_k*P_pred*H_k' + R_k;
-KG_k = (P_pred*H_k') / S_k;
-x_k = x_pred + KG_k*y_k; %posteriori state update equation
+    %PREDICT
+    x_pred = state_transition(x_est,dt); %a priori state
+    
+    %State Transition Jacobian
+    A_k = compute_StateJacobian(x_pred, dt);
+    
+    P_pred = A_k*P_est*A_k' + Qk; 
+    
+    %UPDATE 
+    z = zeros(num_measurements,1); % measurement vector 24x1 for 3 cams
+    for cam_idx = 1:num_cams
+        for feat_idx = 1:num_features
+            meas_idx = (cam_idx -1)*num_features*2 + (feat_idx-1)*2 +1;
+            uv_row_start = (cam_idx - 1) * 4 + 1;
+            uv_row_end = cam_idx * 4;
+            cam_uv = uv(uv_row_start:uv_row_end, :); % 4x2
+            z(meas_idx) = cam_uv(feat_idx,1); %u
+            z(meas_idx+1) = cam_uv(feat_idx,2); %v
+        end
+    end
+    
+    vis_idx = find(~isnan(z)); 
 
-q_norm = norm(x_k(7:10));
-x_est(7:10) = x_k(7:10) / q_norm;
+    if isempty(vis_idx) %No measurements -> prediction only
+        x_est = x_pred;
+        P_est = P+pred;
+        continue;
+    end
 
-I_KH = eye(num_states) - KG_k * H_k; 
-P_est = I_KH * P_pred*I_KH' +KG_k*R_k*KG_k'; %Posteriori process covariance in Joseph form 
-
+    z_k = z(vis_idx); 
+    [h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cams_t, num_cams, num_features, vis_idx);
+    
+    
+    R_k = R_full(vis_idx, vis_idx);
+    
+    y_k = z_k - h_k; %measurement residual 
+        
+    S_k = H_k*P_pred*H_k' + R_k;
+    KG_k = (P_pred*H_k') / S_k;
+    x_k = x_pred + KG_k*y_k; %posteriori state update equation
+    q_norm = norm(x_k(7:10));
+    x_k(7:10) = x_k(7:10) / q_norm;
+    I_KH = eye(num_states) - KG_k * H_k; 
+    P_k = I_KH * P_pred*I_KH' +KG_k*R_k*KG_k'; %Posteriori process covariance in Joseph form 
+    
+    x_est = x_k;
+    P_est = P_k;
+end
 
 %f(x_pred)
 function x_next = state_transition(x_current, dt)
@@ -193,30 +213,20 @@ function [h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cam
     H_full = zeros(num_meas, 13); 
 
     for cam_idx = 1:num_cams
-        % Row indices for this camera
-        row_start = (cam_idx - 1) * 3 + 1;
-        row_end = cam_idx * 3;
         
         % Extract camera parameters
-        cam_K = cams_K(row_start:row_end, :);    % 3x3
-        cam_R = cams_R(row_start:row_end, :);    % 3x3: UE world to UE camera
-        cam_t = cams_t(row_start:row_end);       % 3x1: UE world to UE camera
-        %transform to openCV cam coord convention from UE world
-        % R_ue2cv = [0   1   0;  % openCV x = right, UE y = right 
-        %            0   0  -1;  % openCV y = down, UE z = up
-        %            1   0   0]; % openCV z = forward, UE x = forward
+        cam_K = cams_K(:, :, cam_idx);    % 3x3
+        cam_R = cams_R(:, :, cam_idx);    % 3x3
+        cam_t = cams_t(:, :, cam_idx);    % 3x1
         
-
-        %MATLAB to intrisic coord transform
+        %MATLAB to intrisic coord transform -> will need to check what
+        %camera frame is assigned to the camera 
         R_rh2cv = [0   -1   0;  % camIntrin x = right, RH y = left
                    0    0  -1;  % camIntrin y = down, RH z = up
                    1    0   0]; % camIntrin z = forwards, RH x= forward
 
         R_w2cv = R_rh2cv*cam_R;
         t_w2cv = -R_w2cv*cam_t;
-
-        % R_c2w = R_w2cv'; % camera to world (rotation of W wrt C)
-        % t_c2w = -R_c2w*t_w2cv; % camera to world pure translation 
 
         M_ext = [R_w2cv, t_w2cv; 0 0 0 1]; % extrinsics: camera to world 
         M_int = [cam_K, zeros(3,1)]; %intrisics:camera to pixel
@@ -259,7 +269,7 @@ function [h_k, H_k] = calculate_h_and_H(x_pred, body_coords, cams_K, cams_R, cam
 
             %Projection Jacobian: dPixel/dCameraCoord
             dpix_dC = [fx/Z_cam, 0, -fx*X_cam/(Z_cam^2); % du/dx,du/dy,du/dz
-                         0, fy/Z_cam, -fy*Y_cam/(Z_cam^2)]; %dv/dx,dv/dy,dv/dz
+                       0, fy/Z_cam, -fy*Y_cam/(Z_cam^2)]; %dv/dx,dv/dy,dv/dz
             
             dPc_dPw= R_w2cv;%cam.R;%dCam/dWorld
 
