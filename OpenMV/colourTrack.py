@@ -4,18 +4,17 @@
 
 import sensor
 import time
-from machine import RTC
 import struct
 import sys
 
-CAM_ID = 1  # unique ID per camera: change per cam
+CAM_ID = 2  # unique ID per camera: change per cam
 sentinel = 65535
 
-# LAB Colour Tracking Thresholds (L_min, L_max, A_min, A_max, B_min, B_max)
-redThreshold = (41, 58, 11, 39, 15, 33)
-greenThreshold = (30, 45, -40, -27, 20, 40)
-blueThreshold = (11, 25, 6, 16, -41, -2)
-yellowThreshold = (60, 85, -25, -10, 40, 60)
+# LAB Colour Tracking Thresholds (L_min, L_max, A_min, A_max, B_min, B_max) a: green-red  b: blue-yellow
+redThreshold = (15, 58, 25, 50, 15, 45)
+greenThreshold = (10, 60, -50, -15, 10, 40)
+blueThreshold = (11, 56, 6, 16, -41, -2)
+yellowThreshold = (70, 100, -18, -1, 10, 60)
 
 thresholds = [redThreshold, greenThreshold, blueThreshold, yellowThreshold]
 num_features = len(thresholds)
@@ -34,71 +33,33 @@ sensor.set_auto_gain(False)  # Disable auto gain for colour tracking
 sensor.set_auto_whitebal(False)  # Disable auto white balance
 clock = time.clock()  # Create a clock object to track the FPS.
 
-rtc = RTC()  # initialises the RTC time and date -> will keep the time until power is completely lost by the system
-rtc.datetime((2026, 3, 2, 0, 10, 5, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
-rtc.datetime((2026, 2, 25, 3, 15, 45, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
-# weekday: 0=Mon...6=Sun, subsecond: hardware-dependent countdown
-# print(rtc.datetime())
-
-# Record ticks at startup to compute sub-second offset
-_last_rtc_second = -1
-_ticks_at_second = time.ticks_ms()
-
-
 # ROI windowing for blob detection
 ROIsize = 100  # pixels
 frameW = sensor.width()
 frameH = sensor.height()
 
-lastUV = [None]*numColours
-lostCount = [0]*numColours
+lastUV = [None]*num_features
+lostCount = [0]*num_features
 maxLostFrames = 5
 
-def get_timestamp():
+# Packet format: <B I 8H  (21 bytes total)
+#   B  : cam_id      (uint8)
+#   I  : tick_ms     (uint32, ticks_ms at frame capture)
+#   8H : u,v pairs   (uint16 x8: R_u, R_v, G_u, G_v, B_u, B_v, Y_u, Y_v)
+PACKET_FMT = '<BI8H'
+
+
+def pack_and_send(cam_id, tick_ms, features_uv):
     """
-    Get RTC hour, minute, second plus sub-second millisecond interpolation
-
-    rtc.datetime() returns:
-        (year, month, day, weekday, hour, minute, second, subsecond)
-         [0]    [1]   [2]   [3]    [4]   [5]     [6]      [7]
-
-    The RTC subsecond field is a hardware countdown counter -> resolution
-    varies by board. time.ticks_ms() interpolates reliable milliseconds within
-    the current second instead.
-
-    Returns: (hour, minute, second, subsec_ms)
-    """
-    global _last_rtc_second, _ticks_at_second
-
-    dt = rtc.datetime()
-    hour = dt[4]
-    minute = dt[5]
-    second = dt[6]
-
-    current_ticks = time.ticks_ms()
-
-    # Detect second rollover to resync ticks
-    if second != _last_rtc_second:
-        _last_rtc_second = second
-        _ticks_at_second = current_ticks
-
-    # Milliseconds elapsed since last whole second
-    subsec_ms = time.ticks_diff(current_ticks, _ticks_at_second) % 1000
-    return (hour, minute, second, subsec_ms)
-
-
-def pack_and_send(cam_id, timestamp, features_uv):
-    """
-    Pack detection results into a 26-byte uint16 packet and send over USB.
+    Pack detection results into a 21-byte packet and send over USB.
 
     Parameters:
         cam_id: int, camera identifier (1-12)
-        timestamp: tuple (hour, minute, second, subsec_ms)
+        tick_ms: int, time.ticks_ms() at frame capture
         features_uv: list of (u, v) tuples or None for each feature [R, G, B, Y]
     """
-    hour, minute, second, subsec_ms = timestamp
 
-    values = [cam_id, hour, minute, second, subsec_ms]
+    values = []
     for uv in features_uv:
         if uv is not None:
             values.append(uv[0])
@@ -106,17 +67,7 @@ def pack_and_send(cam_id, timestamp, features_uv):
         else:
             values.append(sentinel)
             values.append(sentinel)
-    # Packet format (little endian uint16):
-    # [0] cam_id
-    # [1] hour
-    # [2] minute
-    # [3] second
-    # [4] subsec_ms
-    # [5-6]  R (u,v)
-    # [7-8]  G (u,v)
-    # [9-10] B (u,v)
-    # [11-12] Y (u,v)
-    packet = struct.pack('<13H', *values)  # Little-endian, 13 x uint16
+    packet = struct.pack(PACKET_FMT, cam_id, tick_ms, *values)
     sys.stdout.buffer.write(packet)
 
 
@@ -132,7 +83,7 @@ def make_roi(cx, cy, size):
 while True:
     clock.tick()
     img = sensor.snapshot()  # trigger image capture
-    timestamp = get_timestamp()
+    tick_ms = time.ticks_ms()
 
     # Detect each colour feature
     use_roi = any(lastUV[i] is not None and lostCount[i] < maxLostFrames for i in range(num_features))
@@ -151,10 +102,10 @@ while True:
     else:
         roi = None  # full frame
     if roi:
-        blobs = img.find_blobs(thresholds, roi=roi, pixels_threshold=PIXEL_THRESHOLD, area_threshold=AREA_THRESHOLD, merge = True)
+        blobs = img.find_blobs(thresholds, roi=roi, pixels_threshold=PIXEL_THRESHOLD, area_threshold=AREA_THRESHOLD, merge=True)
 
     else:
-        blobs = img.find_blobs(thresholds, pixels_threshold=PIXEL_THRESHOLD, area_threshold=AREA_THRESHOLD, merge = True)
+        blobs = img.find_blobs(thresholds, pixels_threshold=PIXEL_THRESHOLD, area_threshold=AREA_THRESHOLD, merge=True)
 
     featuresUV = [None]*num_features
 
@@ -163,11 +114,11 @@ while True:
         for i in range(num_features):
             if code & (1 << i):  # Blobs matches threshold i
                 if featuresUV[i] is None or blob.pixels() > featuresUV[i][2]:
-                    featuresUV[i] = (blob.cx(), blob.cy())
+                    featuresUV[i] = (blob.cx(), blob.cy(), blob.pixels())
     uv_out = [None]*num_features
     for i in range(num_features):
         if featuresUV[i] is not None:
-            uv_out[i] = featuresUV[i]
+            uv_out[i] = (featuresUV[i][0], featuresUV[i][1])
             lastUV[i] = uv_out[i]
             lostCount[i] = 0
         else:
@@ -176,4 +127,4 @@ while True:
                 lastUV[i] = None  # Reset ROI for this colour
 
     # Send packet every frame
-    pack_and_send(CAM_ID, timestamp, uv_out)
+    pack_and_send(CAM_ID, tick_ms, uv_out)
