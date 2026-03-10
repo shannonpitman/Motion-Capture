@@ -8,17 +8,16 @@ from machine import RTC
 import struct
 import sys
 
-CAM_ID = 1  # unique ID per camera
+CAM_ID = 1  # unique ID per camera: change per cam
 sentinel = 65535
 
-# Colour Tracking Thresholds
-redThreshold = (30, 48, 26, 56, 16, 48)
-greenThreshold = (19, 62, -36, -27, -8, 14)
-blueThreshold = (50, 80, 50, 80, 50, 80)
-yellowThreshold = (82, 156, 69, 154, 41, 74)
+# LAB Colour Tracking Thresholds (L_min, L_max, A_min, A_max, B_min, B_max)
+redThreshold = (41, 58, 11, 39, 15, 33)
+greenThreshold = (30, 45, -40, -27, 20, 40)
+blueThreshold = (11, 25, 6, 16, -41, -2)
+yellowThreshold = (60, 85, -25, -10, 40, 60)
 
 thresholds = [redThreshold, greenThreshold, blueThreshold, yellowThreshold]
-colors = [(255, 0, 0), (0, 255, 0)]
 num_features = len(thresholds)
 
 # Blob detection parameters
@@ -28,25 +27,33 @@ AREA_THRESHOLD = 100  # Minimum bounding box area
 # Init Cam
 sensor.reset()  # Reset and initialize the sensor.
 sensor.set_pixformat(sensor.RGB565)  # Set pixel format to RGB565 (or GRAYSCALE)
-sensor.set_framesize(sensor.VGA)  # Set frame size to VGA (640x480)
-sensor.skip_frames(time=2000)  # Wait for settings take effect.
+sensor.set_framesize(sensor.QVGA)  # Set frame size to QVGA, (320 x240) VGA = (640x480)
+sensor.skip_frames(time=2000)  # Wait for settings take effect
 sensor.set_auto_gain(False)  # Disable auto gain for colour tracking
 sensor.set_auto_whitebal(False)  # Disable auto white balance
 clock = time.clock()  # Create a clock object to track the FPS.
 
 rtc = RTC()  # initialises the RTC time and date -> will keep the time until power is completely lost by the system
-rtc.datetime((2026, 2, 25, 1, 12, 0, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
+rtc.datetime((2026, 3, 2, 0, 10, 5, 0, 0))  # Format: (year, month, day, weekday, hour, minute, second, subsecond)
 # weekday: 0=Mon...6=Sun, subsecond: hardware-dependent countdown
-print(rtc.datetime())
+# print(rtc.datetime())
 
 # Record ticks at startup to compute sub-second offset
 _last_rtc_second = -1
 _ticks_at_second = time.ticks_ms()
 
 
+# ROI windowing for blob detection
+ROIsize = 100  # pixels
+frameW = sensor.width()
+frameH = sensor.height()
+lastUV = [None]*num_features
+lostCount = [0]*num_features
+maxLostFrames = 5
+
 def get_timestamp():
     """
-    Get RTC hour, minute, second plus sub-second milliseconds.
+    Get RTC hour, minute, second plus sub-second millisecond interpolation
 
     rtc.datetime() returns:
         (year, month, day, weekday, hour, minute, second, subsecond)
@@ -74,15 +81,7 @@ def get_timestamp():
 
     # Milliseconds elapsed since last whole second
     subsec_ms = time.ticks_diff(current_ticks, _ticks_at_second) % 1000
-
     return (hour, minute, second, subsec_ms)
-
-
-def find_best_blob(blobs):
-    """Return the largest blob by pixel count, or None if no blobs found."""
-    if not blobs:
-        return None
-    return max(blobs, key=lambda b: b.pixels())
 
 
 def pack_and_send(cam_id, timestamp, features_uv):
@@ -104,33 +103,75 @@ def pack_and_send(cam_id, timestamp, features_uv):
         else:
             values.append(sentinel)
             values.append(sentinel)
-
+    # Packet format (little endian uint16):
+    # [0] cam_id
+    # [1] hour
+    # [2] minute
+    # [3] second
+    # [4] subsec_ms
+    # [5-6]  R (u,v)
+    # [7-8]  G (u,v)
+    # [9-10] B (u,v)
+    # [11-12] Y (u,v)
     packet = struct.pack('<13H', *values)  # Little-endian, 13 x uint16
     sys.stdout.buffer.write(packet)
 
 
-# ---- Main Loop ----
+def make_roi(cx, cy, size):
+    x = max(0, cx-size//2)
+    y = max(0, cy-size//2)
+    w = min(size, frameW-x)
+    h = min(size, frameH-y)
+    return (x, y, w, h)
+
+
+# Main
 while True:
     clock.tick()
-    img = sensor.snapshot()
+    img = sensor.snapshot()  # trigger image capture
     timestamp = get_timestamp()
 
     # Detect each colour feature
-    features_uv = []
-    for i, threshold in enumerate(thresholds):
+    use_roi = any(lastUV[i] is not None and lostCount[i] < maxLostFrames for i in range(num_features))
+    if use_roi:
+        # Union ROI over all active colours
+        xs, ys, xe, ye = [], [], [], []
+        for i in range(num_features):
+            if lastUV[i] is not None:
+                cx, cy = lastUV[i]
+                roi = make_roi(cx, cy, ROIsize)
+                xs.append(roi[0])
+                ys.append(roi[1])
+                xe.append(roi[0] + roi[2])
+                ye.append(roi[1] + roi[3])
 
-        blobs = img.find_blobs(
-            [threshold],
-            pixels_threshold=PIXEL_THRESHOLD,
-            area_threshold=AREA_THRESHOLD
-        )
-        best = find_best_blob(blobs)
+        roi = (min(xs), min(ys), max(xe)-min(xs), max(ye)-min(ys))
+    else:
+        roi = None  # full frame
+    if roi:
+        blobs = img.find_blobs(thresholds, roi=roi, pixels_threshold=PIXEL_THRESHOLD, area_threshold=AREA_THRESHOLD, merge = True)
 
-        if best:
-            features_uv.append((best.cx(), best.cy()))
+    else:
+        blobs = img.find_blobs(thresholds, pixels_threshold=PIXEL_THRESHOLD, area_threshold=AREA_THRESHOLD, merge = True)
+
+    featuresUV = [None]*num_features
+
+    for blob in blobs:
+        code = blob.code()
+        for i in range(num_features):
+            if code & (i << i):  # Blobs matches threshold i
+                if featuresUV[i] is None or blob.pixels() > featuresUV[i][2]:
+                    featuresUV[i] = (blob.cx(), blob.cy())
+    uv_out = [None]*num_features
+    for i in range(num_features):
+        if featuresUV[i] is not None:
+            uv_out[i] = featuresUV[i]
+            lastUV[i] = uv_out[i]
+            lostCount[i] = 0
         else:
-            features_uv.append(None)
+            lostCount[i] += 1
+            if lostCount[i] >= maxLostFrames:
+                lastUV[i] = None  # Reset ROI for this colour
 
     # Send packet every frame
-    pack_and_send(CAM_ID, timestamp, features_uv)
-    print(clock.fps())  # Note: OpenMV Cam runs about half as fast when connected
+    pack_and_send(CAM_ID, timestamp, uv_out)
