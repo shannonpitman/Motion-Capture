@@ -161,7 +161,7 @@ while True:
     for blob in blobs:
         code = blob.code()
         for i in range(num_features):
-            if code & (i << i):  # Blobs matches threshold i
+            if code & (1 << i):  # Blobs matches threshold i
                 if featuresUV[i] is None or blob.pixels() > featuresUV[i][2]:
                     featuresUV[i] = (blob.cx(), blob.cy())
     uv_out = [None]*num_features
