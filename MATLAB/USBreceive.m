@@ -1,10 +1,12 @@
 % receiveUSB.m
 % Receives colour blob pixel coordinates from OpenMV RT1062 cameras over USB.
-% Parses 26-byte uint16 binary packets with RTC timestamps.
-% Computes measurement latency by comparing camera RTC time to MATLAB clock.
+% Parses 21-byte binary packets: uint8 cam_id + uint32 tick_ms + 8x uint16 uv.
+% Latency is computed via one-shot sync: on the first packet from each camera,
+% the camera tick and MATLAB toc are recorded as a reference pair. All subsequent
+% latency values are the difference in elapsed time between the two clocks:
 %
-% Run this BEFORE starting the EKF to validate the data pipeline.
-%
+%   latency = (matlab_elapsed - cam_elapsed)
+%           = (toc - matlab_toc_sync) - (cam_tick - cam_tick_sync) / 1000
 % IMPORTANT: 
 %   1. Save the tracking script to the camera first
 %      (OpenMV IDE -> Tools -> Save Open Script to OpenMV Cam)
@@ -16,23 +18,22 @@ clear; clc; close all;
 %% Configuration
 numCams = 2;
 num_features = 4;
-SENTINEL = 65535;               % uint16 NaN equivalent
+SENTINEL = 65535;               % uint16 NaN equivalent - i.e no colour was tracked
 PACKET_SIZE = 26;               % 13 x uint16 = 26 bytes
 RUN_DURATION = 60;              % seconds to run
 featureNames = {'Red', 'Green', 'Blue', 'Yellow'};
 
-% Serial port names — update these for your system
-% Windows: check Device Manager -> Ports (COM & LPT)
-%   Look for "USB Serial Device" after plugging in each camera
-portNames = ["COM3", "COM6"];   
-BAUD_RATE = 115200;
+% Serial port names: check Device Manager -> Ports (COM & LPT), or OpenMV
+% itself when connecting cameras
+portNames = ["COM10", "COM8"];   
+BAUD_RATE = 115200; % of USB
 
 %% Open Serial Ports
 serialPorts = cell(1, numCams);
 for i = 1:numCams
     try
         serialPorts{i} = serialport(portNames(i), BAUD_RATE);
-        configureTerminator(serialPorts{i}, "LF");
+        configureTerminator(serialPorts{i}, "LF"); %line feed (delimiter of reading data)
         flush(serialPorts{i});
         fprintf("Camera %d connected on %s\n", i, portNames(i));
     catch ME
@@ -53,19 +54,24 @@ end
 %% Storage
 % latestUV: numCams x num_features x 2 (u,v) — NaN if not detected
 latestUV = nan(numCams, num_features, 2);
-camTimestamp = NaT(numCams, 1);     % Camera RTC timestamp as datetime
-timeReceived = NaT(numCams, 1);     % MATLAB receive time as datetime
-latencyMs = nan(numCams, 1);        % Estimated latency in milliseconds
+latencyMs = nan(numCams, 1);
 
 packetCount = zeros(numCams, 1);
 parseErrors = zeros(numCams, 1);
+
+% One-shot sync references (set on first valid packet per camera)
+syncCamTick = nan(numCams, 1);   % Camera tick_ms at sync moment
+syncMatlabToc = nan(numCams, 1); % MATLAB toc at sync moment
+
+% Previous packet timing for jitter tracking
+prevCamTick = nan(numCams, 1);
+prevMatlabToc = nan(numCams, 1);
 
 %% Live Display Setup
 fprintf("\n--- Streaming Started ---\n");
 fprintf("Press Ctrl+C to stop\n\n");
 
 tic;
-today = datetime('today');  % Used to build full datetime from RTC h:m:s
 
 %% Main Receive Loop
 try
@@ -77,51 +83,60 @@ try
             if sp.NumBytesAvailable >= PACKET_SIZE
                 % Read exactly one packet
                 rawBytes = read(sp, PACKET_SIZE, "uint8");
-                matlabNow = datetime('now');  % Record arrival time immediately
+                matlabToc = toc;  % Record arrival time immediately
 
-                % Parse: 13 x uint16, little-endian
-                data = typecast(uint8(rawBytes), 'uint16');
+                % Byte 1:    uint8  cam_id
+                % Bytes 2-5: uint32 tick_ms (little-endian)
+                % Bytes 6-21: 8 x uint16 uv pairs (little-endian)
+                cam_id = rawBytes(1);
 
-                if numel(data) ~= 13
-                    parseErrors(camPort) = parseErrors(camPort) + 1;
-                    continue;
-                end
-
-                % Validate cam_id (basic sanity check for byte alignment)
-                cam_id = data(1);
+                % Validate cam_id for byte alignment check
                 if cam_id < 1 || cam_id > 12
-                    % Likely misaligned — flush and resync
                     parseErrors(camPort) = parseErrors(camPort) + 1;
                     flush(sp);
                     continue;
                 end
 
-                % Extract RTC timestamp
-                cam_hour = double(data(2));
-                cam_min = double(data(3));
-                cam_sec = double(data(4));
-                cam_ms = double(data(5));
+% Extract tick_ms (uint32, little-endian)
+                cam_tick = double(typecast(uint8(rawBytes(2:5)), 'uint32'));
 
-                % Validate time fields
-                if cam_hour > 23 || cam_min > 59 || cam_sec > 59 || cam_ms > 999
+                % Extract feature uv data (8 x uint16, little-endian)
+                uv_raw = typecast(uint8(rawBytes(6:21)), 'uint16');
+
+                if numel(uv_raw) ~= 8
                     parseErrors(camPort) = parseErrors(camPort) + 1;
-                    flush(sp);
                     continue;
                 end
 
-                % Build camera timestamp as datetime
-                camTime = today + hours(cam_hour) + minutes(cam_min) + ...
-                    seconds(cam_sec) + milliseconds(cam_ms);
+                % --- One-shot sync ---
+                if isnan(syncCamTick(camPort))
+                    syncCamTick(camPort) = cam_tick;
+                    syncMatlabToc(camPort) = matlabToc;
+                    fprintf("  [SYNC] Camera %d synced: cam_tick=%d, matlab_toc=%.3f\n", ...
+                        cam_id, cam_tick, matlabToc);
+                end
 
-                % Compute latency (camera capture -> MATLAB receive)
-                latency = milliseconds(matlabNow - camTime);
+                % --- Compute latency ---
+                % Elapsed time on each clock since sync
+                camElapsed_s = (cam_tick - syncCamTick(camPort)) / 1000.0;
+                matlabElapsed_s = matlabToc - syncMatlabToc(camPort);
+                latency = (matlabElapsed_s - camElapsed_s) * 1000.0;  % ms
+
+                % --- Frame-to-frame jitter ---
+                jitterStr = '';
+                if ~isnan(prevCamTick(camPort))
+                    camDelta = (cam_tick - prevCamTick(camPort)) / 1000.0;
+                    matlabDelta = matlabToc - prevMatlabToc(camPort);
+                    jitter = (matlabDelta - camDelta) * 1000.0;  % ms
+                    jitterStr = sprintf('jit=%+5.1fms ', jitter);
+                end
+                prevCamTick(camPort) = cam_tick;
+                prevMatlabToc(camPort) = matlabToc;
 
                 % Extract feature pixel coordinates
-                uv_data = data(6:13);  % [u_r, v_r, u_g, v_g, u_b, v_b, u_y, v_y]
-
                 for feat = 1:num_features
-                    u_val = uv_data((feat-1)*2 + 1);
-                    v_val = uv_data((feat-1)*2 + 2);
+                    u_val = uv_raw((feat-1)*2 + 1);
+                    v_val = uv_raw((feat-1)*2 + 2);
 
                     if u_val == SENTINEL || v_val == SENTINEL
                         latestUV(camPort, feat, :) = NaN;
@@ -130,16 +145,11 @@ try
                         latestUV(camPort, feat, 2) = double(v_val);
                     end
                 end
-
-                % Store timing data
-                camTimestamp(camPort) = camTime;
-                timeReceived(camPort) = matlabNow;
                 latencyMs(camPort) = latency;
                 packetCount(camPort) = packetCount(camPort) + 1;
-
                 % Display parsed packet
-                fprintf("Cam %d | %02d:%02d:%02d.%03d | lat=%5.0fms | ", ...
-                    cam_id, cam_hour, cam_min, cam_sec, cam_ms, latency);
+                fprintf("Cam %d | tick=%8d | lat=%+6.1fms | %s", ...
+                    cam_id, cam_tick, latency, jitterStr);
                 for feat = 1:num_features
                     u = latestUV(camPort, feat, 1);
                     v = latestUV(camPort, feat, 2);
@@ -153,7 +163,6 @@ try
             end
         end
 
-        % Small pause to avoid busy-waiting
         pause(0.0005);
     end
 catch ME
@@ -169,17 +178,12 @@ elapsedTime = toc;
 for i = 1:numCams
     if packetCount(i) > 0
         avgFPS = packetCount(i) / elapsedTime;
-        fprintf("Camera %d: %d packets (%.1f fps), %d parse errors\n", ...
-            i, packetCount(i), avgFPS, parseErrors(i));
+        fprintf("Camera %d: %d packets (%.1f fps), %d parse errors, final latency=%.1fms\n", ...
+            i, packetCount(i), avgFPS, parseErrors(i), latencyMs(i));
     else
         fprintf("Camera %d: No packets received. Check connection.\n", i);
     end
 end
-
-fprintf("\nNOTE on latency values:\n");
-fprintf("  Latency accuracy depends on the camera RTC being set correctly.\n");
-fprintf("  If latency is large/negative, re-sync the RTC init time in the\n");
-fprintf("  OpenMV script to match your PC clock, then re-save to camera.\n");
 
 % Close serial ports
 for i = 1:numCams
