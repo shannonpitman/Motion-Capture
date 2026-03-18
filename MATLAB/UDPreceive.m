@@ -51,7 +51,7 @@ latestUV   = nan(numCams, num_features, 2);
 latencyMs  = nan(numCams, 1);
 
 packetCount = zeros(numCams, 1);
-parseErrors = 0;
+parseErrors = zeros(numCams, 1);
 unknownCams = 0;
 
 % One-shot sync references (set on first valid packet per camera)
@@ -66,13 +66,24 @@ prevMatlabToc = nan(numCams, 1);
 camIdMap = nan(numCams, 1);     % camIdMap(i) = cam_id for internal slot i
 nextSlot = 1;
 
+% Logging for post-run analysis
+maxLog = 50000;  % pre-allocate for performance
+logIdx = 0;
+logData = struct( ...
+    'slot',       zeros(maxLog, 1), ...
+    'cam_id',     zeros(maxLog, 1), ...
+    'cam_tick',   zeros(maxLog, 1), ...
+    'matlabToc',  zeros(maxLog, 1), ...
+    'latencyMs',  zeros(maxLog, 1), ...
+    'jitterMs',   nan(maxLog, 1), ...
+    'uv',         nan(maxLog, num_features, 2) ...
+);
 %% LIVE DISPLAY
 fprintf("\n--- UDP Streaming Started ---\n");
 fprintf("Waiting for camera packets on port %d ...\n", LISTEN_PORT);
 fprintf("Press Ctrl+C to stop\n\n");
 
 tic;
-
 %% MAIN LOOP
 try
     while toc < RUN_DURATION
@@ -152,10 +163,21 @@ try
 
             latencyMs(slot) = latency;
             packetCount(slot) = packetCount(slot) + 1;
-
+            % Log this packet
+            if logIdx < maxLog
+                logIdx = logIdx + 1;
+                logData.slot(logIdx)      = slot;
+                logData.cam_id(logIdx)    = cam_id;
+                logData.cam_tick(logIdx)  = cam_tick;
+                logData.matlabToc(logIdx) = matlabToc;
+                logData.latencyMs(logIdx) = latency;
+                if exist('jitter', 'var')
+                    logData.jitterMs(logIdx) = jitter;
+                end
+                logData.uv(logIdx, :, :)  = latestUV(slot, :, :);
+            end
             % Display parsed packet
-            fprintf("Cam %d | tick=%8d | lat=%+6.1fms | %s", ...
-                cam_id, cam_tick, latency, jitterStr);
+            fprintf("Cam %d | tick=%8d | lat=%+6.1fms | %s", cam_id, cam_tick, latency, jitterStr);
             for feat = 1:num_features
                 uv_u = latestUV(slot, feat, 1);
                 uv_v = latestUV(slot, feat, 2);
@@ -178,14 +200,30 @@ catch ME
 end
 
 %% Results
+% Trim log to actual size
+logData.slot      = logData.slot(1:logIdx);
+logData.cam_id    = logData.cam_id(1:logIdx);
+logData.cam_tick  = logData.cam_tick(1:logIdx);
+logData.matlabToc = logData.matlabToc(1:logIdx);
+logData.latencyMs = logData.latencyMs(1:logIdx);
+logData.jitterMs  = logData.jitterMs(1:logIdx);
+logData.uv        = logData.uv(1:logIdx, :, :);
+
+save('udp_latency_log.mat', 'logData', 'syncCamTick', 'syncMatlabToc');
+fprintf("Log saved to udp_latency_log.mat\n");
+
 fprintf("\n--- UDP Streaming Complete ---\n");
 elapsedTime = toc;
 
 for i = 1:numCams
     if packetCount(i) > 0
         avgFPS = packetCount(i) / elapsedTime;
-        fprintf("Camera %d (slot %d): %d packets (%.1f fps), final latency=%.1fms\n", ...
-            camIdMap(i), i, packetCount(i), avgFPS, latencyMs(i));
+        fprintf("Camera %d (slot %d): %d packets (%.1f fps), final latency=%.1fms\n", camIdMap(i), i, packetCount(i), avgFPS, latencyMs(i));
+        % Stats on corrected latency for this camera
+        camMask = logData.camPort == i;
+        camCorrLat = logData.corrLatMs(camMask);
+        camJitter = logData.jitterMs(camMask);
+        camJitter = camJitter(~isnan(camJitter));
     else
         fprintf("Slot %d: No packets received.\n", i);
     end
