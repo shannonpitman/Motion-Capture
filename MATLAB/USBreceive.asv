@@ -19,7 +19,7 @@ clear; clc; close all;
 numCams = 2;
 num_features = 4;
 SENTINEL = 65535;               % uint16 NaN equivalent - i.e no colour was tracked
-PACKET_SIZE = 21;               % 1 + 4 + 16
+PACKET_SIZE = 26;               % 13 x uint16 = 26 bytes
 RUN_DURATION = 60;              % seconds to run
 featureNames = {'Red', 'Green', 'Blue', 'Yellow'};
 

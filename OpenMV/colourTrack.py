@@ -13,7 +13,7 @@ sentinel = 65535
 # LAB Colour Tracking Thresholds (L_min, L_max, A_min, A_max, B_min, B_max) a: green-red  b: blue-yellow
 redThreshold = (15, 58, 25, 50, 15, 45)
 greenThreshold = (10, 60, -50, -15, 10, 40)
-blueThreshold = (11, 56, 6, 16, -41, -2)
+blueThreshold = (11, 56, -5, 16, -50, -2)
 yellowThreshold = (70, 100, -18, -1, 10, 60)
 
 thresholds = [redThreshold, greenThreshold, blueThreshold, yellowThreshold]
