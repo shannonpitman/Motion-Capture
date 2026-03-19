@@ -18,9 +18,9 @@ clear; clc; close all;
 %% Configuration
 numCams = 2;
 num_features = 4;
-SENTINEL = 65535;               % uint16 NaN equivalent - i.e no colour was tracked
-PACKET_SIZE = 21;               % 1 + 4 + 16
-RUN_DURATION = 60;              % seconds to run
+SENTINEL = 65535; % uint16 NaN equivalent - i.e no colour was tracked
+PACKET_SIZE = 21; % 1 + 4 + 16
+RUN_DURATION = 60; % seconds to run
 featureNames = {'Red', 'Green', 'Blue', 'Yellow'};
 
 % Serial port names: check Device Manager -> Ports (COM & LPT), or OpenMV
@@ -66,6 +66,18 @@ syncMatlabToc = nan(numCams, 1); % MATLAB toc at sync moment
 % Previous packet timing for jitter tracking
 prevCamTick = nan(numCams, 1);
 prevMatlabToc = nan(numCams, 1);
+
+maxLog = 50000;
+logIdx = 0;
+logData = struct( ...
+    'camPort',    zeros(maxLog, 1), ...
+    'cam_id',     zeros(maxLog, 1), ...
+    'cam_tick',   zeros(maxLog, 1), ...
+    'matlabToc',  zeros(maxLog, 1), ...
+    'latencyMs',  zeros(maxLog, 1), ...
+    'jitterMs',   nan(maxLog, 1), ...
+    'uv',         nan(maxLog, num_features, 2) ...
+);
 
 %% Live Display Setup
 fprintf("\n--- Streaming Started ---\n");
@@ -118,11 +130,12 @@ try
 
                 %Compute latency
                 % Elapsed time on each clock since sync
-                camElapsed_s = (cam_tick - syncCamTick(camPort)) / 1000.0;
+                camElapsed_s = (cam_tick - syncCamTick(camPort)) / 1000.0; % in seconds
                 matlabElapsed_s = matlabToc - syncMatlabToc(camPort);
                 latency = (matlabElapsed_s - camElapsed_s) * 1000.0;  % ms
 
                 %Frame-to-frame jitter
+                jitter = NaN;
                 jitterStr = '';
                 if ~isnan(prevCamTick(camPort))
                     camDelta = (cam_tick - prevCamTick(camPort)) / 1000.0;
@@ -147,6 +160,17 @@ try
                 end
                 latencyMs(camPort) = latency;
                 packetCount(camPort) = packetCount(camPort) + 1;
+                if logIdx < maxLog
+                    logIdx = logIdx + 1;
+                    logData.camPort(logIdx)   = camPort;
+                    logData.cam_id(logIdx)    = cam_id;
+                    logData.cam_tick(logIdx)  = cam_tick;
+                    logData.matlabToc(logIdx) = matlabToc;
+                    logData.latencyMs(logIdx) = latency;
+                    logData.jitterMs(logIdx)  = jitter;
+                    logData.uv(logIdx, :, :)  = latestUV(camPort, :, :);
+                end
+
                 % Display parsed packet
                 fprintf("Cam %d | tick=%8d | lat=%+6.1fms | %s", ...
                     cam_id, cam_tick, latency, jitterStr);
@@ -173,6 +197,17 @@ catch ME
 end
 
 %% Results
+logData.camPort   = logData.camPort(1:logIdx);
+logData.cam_id    = logData.cam_id(1:logIdx);
+logData.cam_tick  = logData.cam_tick(1:logIdx);
+logData.matlabToc = logData.matlabToc(1:logIdx);
+logData.latencyMs = logData.latencyMs(1:logIdx);
+logData.jitterMs  = logData.jitterMs(1:logIdx);
+logData.uv        = logData.uv(1:logIdx, :, :);
+ 
+save('usb_latency_log.mat', 'logData', 'syncCamTick', 'syncMatlabToc');
+fprintf("Log saved to usb_latency_log.mat\n");
+
 fprintf("\n--- Streaming Complete ---\n");
 elapsedTime = toc;
 for i = 1:numCams
@@ -180,6 +215,12 @@ for i = 1:numCams
         avgFPS = packetCount(i) / elapsedTime;
         fprintf("Camera %d: %d packets (%.1f fps), %d parse errors, final latency=%.1fms\n", ...
             i, packetCount(i), avgFPS, parseErrors(i), latencyMs(i));
+        fprintf("Latency mean: %+.1f ms, std: %.1f ms, min: %+.1f ms, max: %+.1f ms\n", ...
+            mean(camLatency), std(camLatency), min(camLatency), max(camLatency));
+        if ~isempty(camJitter)
+            fprintf("  Jitter   — mean: %+.1f ms, std: %.1f ms, |max|: %.1f ms\n", ...
+                mean(camJitter), std(camJitter), max(abs(camJitter)));
+        end
     else
         fprintf("Camera %d: No packets received. Check connection.\n", i);
     end
