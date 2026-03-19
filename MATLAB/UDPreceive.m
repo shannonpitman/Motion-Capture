@@ -220,8 +220,8 @@ for i = 1:numCams
         avgFPS = packetCount(i) / elapsedTime;
         fprintf("Camera %d (slot %d): %d packets (%.1f fps), final latency=%.1fms\n", camIdMap(i), i, packetCount(i), avgFPS, latencyMs(i));
         % Stats on corrected latency for this camera
-        camMask = logData.camPort == i;
-        camCorrLat = logData.corrLatMs(camMask);
+        camMask = logData.slot == i;
+        camCorrLat = logData.latencyMs(camMask);
         camJitter = logData.jitterMs(camMask);
         camJitter = camJitter(~isnan(camJitter));
     else

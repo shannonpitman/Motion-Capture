@@ -40,7 +40,7 @@ AREA_THRESHOLD = 100
 
 
 #  WiFi CONNECTION
-wlan = network.WLAN(network.STA_IF)
+wlan = network.WLAN(network.STA_IF)  # make it a station and connect as a client
 wlan.active(True)
 
 print("Connecting to WiFi '%s'..." % WIFI_SSID)
