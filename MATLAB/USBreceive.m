@@ -70,7 +70,7 @@ prevMatlabToc = nan(numCams, 1);
 
 maxLog = 50000;
 logIdx = 0;
-logData = struct( ...
+USBLogData = struct( ...
     'camPort',    zeros(maxLog, 1), ...
     'cam_id',     zeros(maxLog, 1), ...
     'cam_tick',   zeros(maxLog, 1), ...
@@ -163,13 +163,13 @@ try
                 packetCount(camPort) = packetCount(camPort) + 1;
                 if logIdx < maxLog
                     logIdx = logIdx + 1;
-                    logData.camPort(logIdx)   = camPort;
-                    logData.cam_id(logIdx)    = cam_id;
-                    logData.cam_tick(logIdx)  = cam_tick;
-                    logData.matlabToc(logIdx) = matlabToc;
-                    logData.latencyMs(logIdx) = latency;
-                    logData.jitterMs(logIdx)  = jitter;
-                    logData.uv(logIdx, :, :)  = latestUV(camPort, :, :);
+                    USBLogData.camPort(logIdx)   = camPort;
+                    USBLogData.cam_id(logIdx)    = cam_id;
+                    USBLogData.cam_tick(logIdx)  = cam_tick;
+                    USBLogData.matlabToc(logIdx) = matlabToc;
+                    USBLogData.latencyMs(logIdx) = latency;
+                    USBLogData.jitterMs(logIdx)  = jitter;
+                    USBLogData.uv(logIdx, :, :)  = latestUV(camPort, :, :);
                 end
 
                 % Display parsed packet
@@ -198,15 +198,15 @@ catch ME
 end
 
 %% Results
-logData.camPort   = logData.camPort(1:logIdx);
-logData.cam_id    = logData.cam_id(1:logIdx);
-logData.cam_tick  = logData.cam_tick(1:logIdx);
-logData.matlabToc = logData.matlabToc(1:logIdx);
-logData.latencyMs = logData.latencyMs(1:logIdx);
-logData.jitterMs  = logData.jitterMs(1:logIdx);
-logData.uv        = logData.uv(1:logIdx, :, :);
+USBLogData.camPort   = USBLogData.camPort(1:logIdx);
+USBLogData.cam_id    = USBLogData.cam_id(1:logIdx);
+USBLogData.cam_tick  = USBLogData.cam_tick(1:logIdx);
+USBLogData.matlabToc = USBLogData.matlabToc(1:logIdx);
+USBLogData.latencyMs = USBLogData.latencyMs(1:logIdx);
+USBLogData.jitterMs  = USBLogData.jitterMs(1:logIdx);
+USBLogData.uv        = USBLogData.uv(1:logIdx, :, :);
  
-save('usb_latency_log.mat', 'logData', 'syncCamTick', 'syncMatlabToc');
+save('usb_latency_log.mat', 'USBLogData', 'syncCamTick', 'syncMatlabToc');
 fprintf("Log saved to usb_latency_log.mat\n");
 
 fprintf("\n--- Streaming Complete ---\n");
@@ -216,9 +216,9 @@ for i = 1:numCams
         avgFPS = packetCount(i) / elapsedTime;
         fprintf("Camera %d: %d packets (%.1f fps), %d parse errors, final latency=%.1fms\n", ...
             i, packetCount(i), avgFPS, parseErrors(i), latencyMs(i));
-        camMask = logData.cam_id == i;
-        camLat = logData.latencyMs(camMask);
-        camJit = logData.jitterMs(camMask);
+        camMask = USBLogData.cam_id == i;
+        camLat = USBLogData.latencyMs(camMask);
+        camJit = USBLogData.jitterMs(camMask);
         camJit = camJit(~isnan(camJit));
         fprintf("Latency mean: %+.1f ms, std: %.1f ms, min: %+.1f ms, max: %+.1f ms\n", ...
             mean(camLat), std(camLat), min(camLat), max(camLat));

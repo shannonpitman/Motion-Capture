@@ -63,14 +63,14 @@ prevCamTick  = nan(numCams, 1);
 prevMatlabToc = nan(numCams, 1);
 
 % Camera ID -> internal index mapping (auto-discovered)
-camIdMap = nan(numCams, 1);  % camIdMap(i) = cam_id for internal slot i
+camIdMap = nan(numCams, 1);  % camIdMap(i) = cam_id for internal camPort i
 nextSlot = 1;
 
 % Logging for post-run analysis
 maxLog = 50000;  % pre-allocate for performance
 logIdx = 0;
-logData = struct( ...
-    'slot',       zeros(maxLog, 1), ...
+udpLogData = struct( ...
+    'camPort',       zeros(maxLog, 1), ...
     'cam_id',     zeros(maxLog, 1), ...
     'cam_tick',   zeros(maxLog, 1), ...
     'matlabToc',  zeros(maxLog, 1), ...
@@ -101,16 +101,16 @@ try
             end
 
             % Map cam_id to internal index
-            slot = find(camIdMap == cam_id, 1);
-            if isempty(slot)
+            camPort = find(camIdMap == cam_id, 1);
+            if isempty(camPort)
                 if nextSlot > numCams
                     unknownCams = unknownCams + 1;
                     continue;  % All slots full, ignore extra cameras
                 end
-                slot = nextSlot;
-                camIdMap(slot) = cam_id;
+                camPort = nextSlot;
+                camIdMap(camPort) = cam_id;
                 nextSlot = nextSlot + 1;
-                fprintf("  [DISCOVERED] Camera %d assigned to slot %d\n", cam_id, slot);
+                fprintf("  [DISCOVERED] Camera %d assigned to camPort %d\n", cam_id, camPort);
             end
 
             % Parse tick_ms (uint32, little-endian)
@@ -125,29 +125,29 @@ try
             end
 
             % One-shot sync
-            if isnan(syncCamTick(slot))
-                syncCamTick(slot)  = cam_tick;
-                syncMatlabToc(slot) = matlabToc;
+            if isnan(syncCamTick(camPort))
+                syncCamTick(camPort)  = cam_tick;
+                syncMatlabToc(camPort) = matlabToc;
                 fprintf("  [SYNC] Camera %d synced: cam_tick=%d, matlab_toc=%.3f\n", ...
                     cam_id, cam_tick, matlabToc);
             end
 
             % Compute latency
-            camElapsed_s    = (cam_tick - syncCamTick(slot)) / 1000.0;
-            matlabElapsed_s = matlabToc - syncMatlabToc(slot);
+            camElapsed_s    = (cam_tick - syncCamTick(camPort)) / 1000.0;
+            matlabElapsed_s = matlabToc - syncMatlabToc(camPort);
             latency = (matlabElapsed_s - camElapsed_s) * 1000.0;  % ms
 
             % Frame-to-frame jitter
             jitterStr = '';
             jitter = NaN;
-            if ~isnan(prevCamTick(slot))
-                camDelta    = (cam_tick - prevCamTick(slot)) / 1000.0;
-                matlabDelta = matlabToc - prevMatlabToc(slot);
+            if ~isnan(prevCamTick(camPort))
+                camDelta    = (cam_tick - prevCamTick(camPort)) / 1000.0;
+                matlabDelta = matlabToc - prevMatlabToc(camPort);
                 jitter = (matlabDelta - camDelta) * 1000.0;
                 jitterStr = sprintf('jit=%+5.1fms ', jitter);
             end
-            prevCamTick(slot)  = cam_tick;
-            prevMatlabToc(slot) = matlabToc;
+            prevCamTick(camPort)  = cam_tick;
+            prevMatlabToc(camPort) = matlabToc;
 
             % Extract feature pixel coordinates 
             for feat = 1:num_features
@@ -155,33 +155,33 @@ try
                 v_val = uv_raw((feat-1)*2 + 2);
 
                 if u_val == SENTINEL || v_val == SENTINEL
-                    latestUV(slot, feat, :) = NaN;
+                    latestUV(camPort, feat, :) = NaN;
                 else
-                    latestUV(slot, feat, 1) = double(u_val);
-                    latestUV(slot, feat, 2) = double(v_val);
+                    latestUV(camPort, feat, 1) = double(u_val);
+                    latestUV(camPort, feat, 2) = double(v_val);
                 end
             end
 
-            latencyMs(slot) = latency;
-            packetCount(slot) = packetCount(slot) + 1;
+            latencyMs(camPort) = latency;
+            packetCount(camPort) = packetCount(camPort) + 1;
             % Log this packet
             if logIdx < maxLog
                 logIdx = logIdx + 1;
-                logData.slot(logIdx)      = slot;
-                logData.cam_id(logIdx)    = cam_id;
-                logData.cam_tick(logIdx)  = cam_tick;
-                logData.matlabToc(logIdx) = matlabToc;
-                logData.latencyMs(logIdx) = latency;
+                udpLogData.camPort(logIdx)      = camPort;
+                udpLogData.cam_id(logIdx)    = cam_id;
+                udpLogData.cam_tick(logIdx)  = cam_tick;
+                udpLogData.matlabToc(logIdx) = matlabToc;
+                udpLogData.latencyMs(logIdx) = latency;
                 if exist('jitter', 'var')
-                    logData.jitterMs(logIdx) = jitter;
+                    udpLogData.jitterMs(logIdx) = jitter;
                 end
-                logData.uv(logIdx, :, :)  = latestUV(slot, :, :);
+                udpLogData.uv(logIdx, :, :)  = latestUV(camPort, :, :);
             end
             % Display parsed packet
             fprintf("Cam %d | tick=%8d | lat=%+6.1fms | %s", cam_id, cam_tick, latency, jitterStr);
             for feat = 1:num_features
-                uv_u = latestUV(slot, feat, 1);
-                uv_v = latestUV(slot, feat, 2);
+                uv_u = latestUV(camPort, feat, 1);
+                uv_v = latestUV(camPort, feat, 2);
                 if isnan(uv_u)
                     fprintf("%s:[-,-] ", featureNames{feat});
                 else
@@ -202,15 +202,15 @@ end
 
 %% Results
 % Trim log to actual size
-logData.slot      = logData.slot(1:logIdx);
-logData.cam_id    = logData.cam_id(1:logIdx);
-logData.cam_tick  = logData.cam_tick(1:logIdx);
-logData.matlabToc = logData.matlabToc(1:logIdx);
-logData.latencyMs = logData.latencyMs(1:logIdx);
-logData.jitterMs  = logData.jitterMs(1:logIdx);
-logData.uv        = logData.uv(1:logIdx, :, :);
+udpLogData.camPort      = udpLogData.camPort(1:logIdx);
+udpLogData.cam_id    = udpLogData.cam_id(1:logIdx);
+udpLogData.cam_tick  = udpLogData.cam_tick(1:logIdx);
+udpLogData.matlabToc = udpLogData.matlabToc(1:logIdx);
+udpLogData.latencyMs = udpLogData.latencyMs(1:logIdx);
+udpLogData.jitterMs  = udpLogData.jitterMs(1:logIdx);
+udpLogData.uv        = udpLogData.uv(1:logIdx, :, :);
 
-save('udp_latency_log.mat', 'logData', 'syncCamTick', 'syncMatlabToc');
+save('udp_latency_log.mat', 'udpLogData', 'syncCamTick', 'syncMatlabToc');
 fprintf("Log saved to udp_latency_log.mat\n");
 
 fprintf("\n--- UDP Streaming Complete ---\n");
@@ -219,10 +219,10 @@ elapsedTime = toc;
 for i = 1:numCams
     if packetCount(i) > 0
         avgFPS = packetCount(i) / elapsedTime;
-        fprintf("Camera %d (slot %d): %d packets (%.1f fps), final latency=%.1fms\n", camIdMap(i), i, packetCount(i), avgFPS, latencyMs(i));
-        camMask = logData.slot == i;
-        camLat = logData.latencyMs(camMask);
-        camJit = logData.jitterMs(camMask);
+        fprintf("Camera %d (camPort %d): %d packets (%.1f fps), final latency=%.1fms\n", camIdMap(i), i, packetCount(i), avgFPS, latencyMs(i));
+        camMask = udpLogData.camPort == i;
+        camLat = udpLogData.latencyMs(camMask);
+        camJit = udpLogData.jitterMs(camMask);
         camJit = camJit(~isnan(camJit));
         
         fprintf("  Latency mean: %+.1f ms, std: %.1f ms, min: %+.1f ms, max: %+.1f ms\n", ...
@@ -232,7 +232,7 @@ for i = 1:numCams
                 mean(camJit), std(camJit), max(abs(camJit)));
         end
     else
-        fprintf("Slot %d: No packets received.\n", i);
+        fprintf("camPort %d: No packets received.\n", i);
     end
 end
 fprintf("Parse errors: %d | Unknown camera IDs dropped: %d\n", parseErrors, unknownCams);
