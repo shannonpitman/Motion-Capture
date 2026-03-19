@@ -12,14 +12,14 @@ import struct
 import network
 import socket
 
-CAM_ID = 3  # Unique ID per camera
+CAM_ID = 2  # Unique ID per camera
 
 # WiFi credentials
-WIFI_SSID = "msg.network"  # "dlink-1C691"  # Replace with your WiFi network name
-WIFI_KEY = "msg.t66Yu9"  # "0826583900"  # Replace with your WiFi password
+WIFI_SSID = "msg.network"  # "dlink-1C691"  #  WiFi network name
+WIFI_KEY = "msg.t66Yu9"  # "0826583900"  # WiFi password
 
 # MATLAB host (the PC running UDPreceive.m)
-HOST_IP = "192.168.0.32"  # "192.168.0.124"  # Replace with your MATLAB PC's IP address (powershell: ipconfig)
+HOST_IP = "192.168.0.32"  # "192.168.0.124"  # MATLAB PC's IP address (powershell: ipconfig)
 HOST_PORT = 7007  # Must match MATLAB listener port
 
 #  COLOUR THRESHOLDS
@@ -49,8 +49,8 @@ wlan.connect(WIFI_SSID, WIFI_KEY)
 # Wait for connection (with timeout)
 t0 = time.ticks_ms()
 while not wlan.isconnected():
-    if time.ticks_diff(time.ticks_ms(), t0) > 15000:
-        raise OSError("WiFi connection timed out after 15 s")
+    if time.ticks_diff(time.ticks_ms(), t0) > 30000:
+        raise OSError("WiFi connection timed out after 30 s")
     time.sleep_ms(100)
 
 ifconfig = wlan.ifconfig()
