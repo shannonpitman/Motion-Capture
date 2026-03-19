@@ -12,14 +12,14 @@ import struct
 import network
 import socket
 
-CAM_ID = 2  # Unique ID per camera
+CAM_ID = 3  # Unique ID per camera
 
 # WiFi credentials
-WIFI_SSID = "msg.network "  # "dlink-1C691"  # Replace with your WiFi network name
+WIFI_SSID = "msg.network"  # "dlink-1C691"  # Replace with your WiFi network name
 WIFI_KEY = "msg.t66Yu9"  # "0826583900"  # Replace with your WiFi password
 
 # MATLAB host (the PC running UDPreceive.m)
-HOST_IP = "137.158.122.116"  # "192.168.0.124"  # Replace with your MATLAB PC's IP address (powershell: ipconfig)
+HOST_IP = "192.168.0.32"  # "192.168.0.124"  # Replace with your MATLAB PC's IP address (powershell: ipconfig)
 HOST_PORT = 7007  # Must match MATLAB listener port
 
 #  COLOUR THRESHOLDS
@@ -183,3 +183,4 @@ while True:
                 lastUV[i] = None
 
     pack_and_send(CAM_ID, tick_ms, uv_out)
+    print("sent", tick_ms)  # remove after testing — slows FPS
