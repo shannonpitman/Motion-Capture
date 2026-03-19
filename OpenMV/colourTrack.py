@@ -7,7 +7,7 @@ import time
 import struct
 import sys
 
-CAM_ID = 2  # unique ID per camera: change per cam
+CAM_ID = 3  # unique ID per camera: change per cam
 sentinel = 65535
 
 # LAB Colour Tracking Thresholds (L_min, L_max, A_min, A_max, B_min, B_max) a: green-red  b: blue-yellow

@@ -1,6 +1,6 @@
 % receiveUSB.m
 % Receives colour blob pixel coordinates from OpenMV RT1062 cameras over USB.
-% Parses 21-byte binary packets: uint8 cam_id + uint32 tick_ms + 8x uint16 uv.
+% Parses binary packets: uint8 cam_id + uint32 tick_ms + 8x uint16 uv.
 % Latency is computed via one-shot sync: on the first packet from each camera,
 % the camera tick and MATLAB toc are recorded as a reference pair. All subsequent
 % latency values are the difference in elapsed time between the two clocks:
@@ -16,16 +16,17 @@
 clear; clc; close all;
 
 %% Configuration
-numCams = 2;
+numCams = 3;
 num_features = 4;
 SENTINEL = 65535; % uint16 NaN equivalent - i.e no colour was tracked
 PACKET_SIZE = 21; % 1 + 4 + 16
+
 RUN_DURATION = 60; % seconds to run
 featureNames = {'Red', 'Green', 'Blue', 'Yellow'};
 
 % Serial port names: check Device Manager -> Ports (COM & LPT), or OpenMV
 % itself when connecting cameras
-portNames = ["COM5", "COM6"];   
+portNames = ["COM5", "COM6", "COM8"];   
 BAUD_RATE = 115200; % of USB
 
 %% Open Serial Ports
@@ -215,11 +216,15 @@ for i = 1:numCams
         avgFPS = packetCount(i) / elapsedTime;
         fprintf("Camera %d: %d packets (%.1f fps), %d parse errors, final latency=%.1fms\n", ...
             i, packetCount(i), avgFPS, parseErrors(i), latencyMs(i));
+        camMask = logData.cam_id == i;
+        camLat = logData.latencyMs(camMask);
+        camJit = logData.jitterMs(camMask);
+        camJit = camJit(~isnan(camJit));
         fprintf("Latency mean: %+.1f ms, std: %.1f ms, min: %+.1f ms, max: %+.1f ms\n", ...
-            mean(camLatency), std(camLatency), min(camLatency), max(camLatency));
-        if ~isempty(camJitter)
+            mean(camLat), std(camLat), min(camLat), max(camLat));
+        if ~isempty(camJit)
             fprintf("  Jitter   — mean: %+.1f ms, std: %.1f ms, |max|: %.1f ms\n", ...
-                mean(camJitter), std(camJitter), max(abs(camJitter)));
+                mean(camJit), std(camJit), max(abs(camJit)));
         end
     else
         fprintf("Camera %d: No packets received. Check connection.\n", i);

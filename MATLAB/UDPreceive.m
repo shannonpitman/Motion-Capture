@@ -12,15 +12,15 @@
 %   2. Set HOST_IP in each camera script to this PC's IP address
 %   3. Set HOST_PORT to match LISTEN_PORT below
 %   4. Ensure all cameras and this PC are on the same WiFi network
-%   5. Disconnect OpenMV IDE before powering cameras (they auto-run)
+%   5. Disconnect OpenMV IDE before powering cameras (they auto-run); power
+%   each camera up individually to prevent DHCP startup issues
 %
-% FINDING YOUR PC's IP:
-%   Windows:  ipconfig  (look for IPv4 Address under your WiFi adapter)
+%Powershell: ipconfig  (IPv4 Address under your WiFi adapter)
 
 clear; clc; close all;
 
 %% CONFIGURATION
-numCams       = 2; % Number of cameras expected
+numCams       = 3; % Number of cameras expected
 num_features  = 4;
 SENTINEL      = 65535; % uint16 NaN equivalent
 PACKET_SIZE   = 21; % 1 + 4 + 16 = 21 bytes
@@ -63,7 +63,7 @@ prevCamTick  = nan(numCams, 1);
 prevMatlabToc = nan(numCams, 1);
 
 % Camera ID -> internal index mapping (auto-discovered)
-camIdMap = nan(numCams, 1);     % camIdMap(i) = cam_id for internal slot i
+camIdMap = nan(numCams, 1);  % camIdMap(i) = cam_id for internal slot i
 nextSlot = 1;
 
 % Logging for post-run analysis
@@ -139,6 +139,7 @@ try
 
             % Frame-to-frame jitter
             jitterStr = '';
+            jitter = NaN;
             if ~isnan(prevCamTick(slot))
                 camDelta    = (cam_tick - prevCamTick(slot)) / 1000.0;
                 matlabDelta = matlabToc - prevMatlabToc(slot);
@@ -182,7 +183,7 @@ try
                 uv_u = latestUV(slot, feat, 1);
                 uv_v = latestUV(slot, feat, 2);
                 if isnan(uv_u)
-                    fprintf("%s:[----,----] ", featureNames{feat});
+                    fprintf("%s:[-,-] ", featureNames{feat});
                 else
                     fprintf("%s:[%4.0f,%4.0f] ", featureNames{feat}, uv_u, uv_v);
                 end
@@ -219,11 +220,17 @@ for i = 1:numCams
     if packetCount(i) > 0
         avgFPS = packetCount(i) / elapsedTime;
         fprintf("Camera %d (slot %d): %d packets (%.1f fps), final latency=%.1fms\n", camIdMap(i), i, packetCount(i), avgFPS, latencyMs(i));
-        % Stats on corrected latency for this camera
         camMask = logData.slot == i;
-        camCorrLat = logData.latencyMs(camMask);
-        camJitter = logData.jitterMs(camMask);
-        camJitter = camJitter(~isnan(camJitter));
+        camLat = logData.latencyMs(camMask);
+        camJit = logData.jitterMs(camMask);
+        camJit = camJit(~isnan(camJit));
+        
+        fprintf("  Latency mean: %+.1f ms, std: %.1f ms, min: %+.1f ms, max: %+.1f ms\n", ...
+            mean(camLat), std(camLat), min(camLat), max(camLat));
+        if ~isempty(camJit)
+            fprintf("  Jitter mean: %+.1f ms, std: %.1f ms, |max|: %.1f ms\n", ...
+                mean(camJit), std(camJit), max(abs(camJit)));
+        end
     else
         fprintf("Slot %d: No packets received.\n", i);
     end
