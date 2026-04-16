@@ -1,0 +1,131 @@
+# Depth Tester - By: Shannon Pitman - Thu Apr 16 2026
+
+import sensor
+import time
+import network
+import socket
+import machine
+
+CAM_ID = 1  # Camera identifier
+
+WIFI_SSID = "msg.network"
+WIFI_KEY = "msg.t66Yu9"
+
+HOST_IP = "192.168.0.32"
+HOST_PORT = 5005
+
+# LAB Colour Thresholds -> Calibrate
+redThreshold = (15, 58, 25, 50, 15, 45)
+greenThreshold = (10, 60, -50, -15, 10, 40)
+blueThreshold = (11, 56, 6, 16, -41, -2)
+yellowThreshold = (70, 100, -18, -1, 10, 60)
+
+thresholds = [redThreshold, greenThreshold, blueThreshold, yellowThreshold]
+num_features = len(thresholds)
+
+# Blob detection parameters
+PIXEL_THRESHOLD = 100
+AREA_THRESHOLD = 100
+
+# WiFi CONNECTION
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+print("Connecting to WiFi '%s'..." % WIFI_SSID)
+wlan.connect(WIFI_SSID, WIFI_KEY)
+
+t0 = time.ticks_ms()
+while not wlan.isconnected():
+    if time.ticks_diff(time.ticks_ms(), t0) > 15000:
+        raise OSError("WiFi connection timed out after 15 s")
+    time.sleep_ms(100)
+
+ifconfig = wlan.ifconfig()
+print("Connected! IP: %s" % ifconfig[0])
+
+# UDP SOCKET
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+target = (HOST_IP, HOST_PORT)
+print("Streaming UDP to %s:%d" % target)
+
+# CAMERA INIT
+sensor.reset()  # initialise
+sensor.set_pixformat(sensor.RGB565)  # 16-bits per pixel
+sensor.set_framesize(sensor.QVGA)  # 320x240
+sensor.skip_frames(time=2000)
+sensor.set_auto_gain(False)
+sensor.set_auto_whitebal(False)
+clock = time.clock()
+
+# Matlab log header
+header = "HEADER,cam_id=%d,res=QVGA,pixfmt=RGB565,auto_gain=0,auto_wb=0," \
+         "pix_thr=%d,area_thr=%d\n" % (CAM_ID, PIXEL_THRESHOLD, AREA_THRESHOLD)
+sock.sendto(header, target)
+print(header, end="")
+
+led = machine.LED("LED_GREEN")
+
+# MAIN LOOP
+while True:
+    if not wlan.isconnected():
+        print("WiFi lost, reconnecting...")
+        wlan.connect(WIFI_SSID, WIFI_KEY)
+        t0 = time.ticks_ms()
+        while not wlan.isconnected():
+            if time.ticks_diff(time.ticks_ms(), t0) > 15000:
+                break
+            time.sleep_ms(100)
+        continue
+
+    clock.tick()
+    img = sensor.snapshot()
+    tick_ms = time.ticks_ms()
+
+    if clock.fps() > 0 and int(tick_ms / 500) % 2 == 0:
+        led.on()
+    else:
+        led.off()
+
+    # Full-frame detection, all colours simultaneously
+    blobs = img.find_blobs(
+        thresholds,
+        pixels_threshold=PIXEL_THRESHOLD,
+        area_threshold=AREA_THRESHOLD,
+        merge=True,
+    )
+
+    # For each colour: count all blobs and track the largest one
+    counts = [0] * num_features
+    largest = [None] * num_features  # stores (pixels, cx, cy, density, w, h)
+
+    for blob in blobs:
+        code = blob.code()  # 32-bit binary each colour threshold part of the blob - only one bit set for each blob
+        pix = blob.pixels()  # number of pixels in the blob
+        for i in range(num_features):
+            if code & (1 << i):
+                counts[i] += 1
+                if largest[i] is None or pix > largest[i][0]:
+                    w = blob.w()
+                    h = blob.h()
+                    bbox_area = w * h if (w * h) > 0 else 1
+                    density = pix / bbox_area
+                    largest[i] = (pix, blob.cx(), blob.cy(), density, w, h)
+
+    # CSV line: cam_id, tick_ms, all the parameters per colour
+    parts = ["%d" % CAM_ID, "%d" % tick_ms]
+    for i in range(num_features):
+        if largest[i] is None:
+            # Not detected: n=0, coords=NaN, rest=0
+            parts.extend(["0", "NaN", "NaN", "0", "0", "0", "0"])
+        else:
+            pix, cx, cy, dens, w, h = largest[i]
+            parts.extend([
+                "%d" % counts[i],
+                "%d" % cx,
+                "%d" % cy,
+                "%d" % pix,
+                "%.3f" % dens,
+                "%d" % w,
+                "%d" % h,
+            ])
+    line = ",".join(parts) + "\n"
+    sock.sendto(line, target)
