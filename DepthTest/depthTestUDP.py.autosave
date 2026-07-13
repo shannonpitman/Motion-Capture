@@ -2,50 +2,55 @@
 
 import sensor
 import time
-import network
-import socket
+# import network
+# import socket
 import machine
 
 CAM_ID = 1  # Camera identifier
 
-WIFI_SSID = "msg.network"
-WIFI_KEY = "msg.t66Yu9"
+# WIFI_SSID = "PitmanStudy"  # "msg.network"
+# WIFI_KEY = "0826583900"  # "msg.t66Yu9"
 
-HOST_IP = "192.168.0.32"
-HOST_PORT = 5005
+# HOST_IP = "192.168.68.103"  # change based on new wifi PC: 192.168.0.32
+# HOST_PORT = 5005
 
 # LAB Colour Thresholds -> Calibrate
-redThreshold = (15, 58, 25, 50, 15, 45)
-greenThreshold = (10, 60, -50, -15, 10, 40)
-blueThreshold = (11, 56, 6, 16, -41, -2)
-yellowThreshold = (70, 100, -18, -1, 10, 60)
+redThreshold = (0, 100, 12, 127, -7, 81)
+greenThreshold = (4, 100, -128, -18, -128, 127)
+blueThreshold = (0, 67, -128, 17, -128, -8)
+yellowThreshold = (51, 100, -128, 56, 29, 127)
 
 thresholds = [redThreshold, greenThreshold, blueThreshold, yellowThreshold]
 num_features = len(thresholds)
+
+colour_labels = ["RED", "GREEN", "BLUE", "YELLOW"]
+draw_colours = [(255, 255, 255), (255, 255, 255), (255, 255, 255), (0, 0, 0)]
+
+cross_size = 10
 
 # Blob detection parameters
 PIXEL_THRESHOLD = 100
 AREA_THRESHOLD = 100
 
 # WiFi CONNECTION
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-print("Connecting to WiFi '%s'..." % WIFI_SSID)
-wlan.connect(WIFI_SSID, WIFI_KEY)
+# wlan = network.WLAN(network.STA_IF)
+# wlan.active(True)
+# print("Connecting to WiFi '%s'..." % WIFI_SSID)
+# wlan.connect(WIFI_SSID, WIFI_KEY)
 
-t0 = time.ticks_ms()
-while not wlan.isconnected():
-    if time.ticks_diff(time.ticks_ms(), t0) > 15000:
-        raise OSError("WiFi connection timed out after 15 s")
-    time.sleep_ms(100)
+# t0 = time.ticks_ms()
+# while not wlan.isconnected():
+#     if time.ticks_diff(time.ticks_ms(), t0) > 15000:
+#         raise OSError("WiFi connection timed out after 15 s")
+#     time.sleep_ms(100)
 
-ifconfig = wlan.ifconfig()
-print("Connected! IP: %s" % ifconfig[0])
+# ifconfig = wlan.ifconfig()
+# print("Connected! IP: %s" % ifconfig[0])
 
 # UDP SOCKET
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-target = (HOST_IP, HOST_PORT)
-print("Streaming UDP to %s:%d" % target)
+# sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# target = (HOST_IP, HOST_PORT)
+# print("Streaming UDP to %s:%d" % target)
 
 # CAMERA INIT
 sensor.reset()  # initialise
@@ -57,25 +62,25 @@ sensor.set_auto_whitebal(False)
 clock = time.clock()
 
 # Matlab log header
-header = "HEADER,cam_id=%d,res=QVGA,pixfmt=RGB565,auto_gain=0,auto_wb=0," \
-         "pix_thr=%d,area_thr=%d\n" % (CAM_ID, PIXEL_THRESHOLD, AREA_THRESHOLD)
-sock.sendto(header, target)
-print(header, end="")
+# header = "HEADER,cam_id=%d,res=QVGA,pixfmt=RGB565,auto_gain=0,auto_wb=0," \
+#          "pix_thr=%d,area_thr=%d\n" % (CAM_ID, PIXEL_THRESHOLD, AREA_THRESHOLD)
+# sock.sendto(header, target)
+# print(header, end="")
 
 led = machine.LED("LED_GREEN")
 
 
 # MAIN LOOP
 while True:
-    if not wlan.isconnected():
-        print("WiFi lost, reconnecting...")
-        wlan.connect(WIFI_SSID, WIFI_KEY)
-        t0 = time.ticks_ms()
-        while not wlan.isconnected():
-            if time.ticks_diff(time.ticks_ms(), t0) > 15000:
-                break
-            time.sleep_ms(100)
-        continue
+    # if not wlan.isconnected():
+    #     print("WiFi lost, reconnecting...")
+    #     wlan.connect(WIFI_SSID, WIFI_KEY)
+    #     t0 = time.ticks_ms()
+    #     while not wlan.isconnected():
+    #         if time.ticks_diff(time.ticks_ms(), t0) > 15000:
+    #             break
+    #         time.sleep_ms(100)
+    #     continue
 
     clock.tick()
     img = sensor.snapshot()
@@ -111,6 +116,22 @@ while True:
                     density = pix / bbox_area
                     largest[i] = (pix, blob.cx(), blob.cy(), density, w, h)
 
+    for i in range(num_features):
+        if largest[i] is None:
+            continue
+        pix, cx, cy, dens, w, h = largest[i]
+        col = draw_colours[i]
+        label = colour_labels[i]
+        # Draw cross
+        img.draw_line(cx - cross_size, cy, cx + cross_size, cy, color=col, thickness=2)
+        img.draw_line(cx, cy - cross_size, cx, cy + cross_size, color=col, thickness=2)
+        # Bounding box
+        bx = cx-w//2
+        by = cy-h//2
+        img.draw_rectangle(bx, by, w, h, color=col, thickness=1)
+        # Label
+        ty = max(by-12, 0)
+        img.draw_string(bx, ty, label, color=col, scale=1, mono_space=False)
     # CSV line: cam_id, tick_ms, all the parameters per colour
     parts = ["%d" % CAM_ID, "%d" % tick_ms]
     for i in range(num_features):
@@ -128,5 +149,5 @@ while True:
                 "%d" % w,
                 "%d" % h,
             ])
-    line = ",".join(parts) + "\n"
-    sock.sendto(line, target)
+    # line = ",".join(parts) + "\n"
+    # sock.sendto(line, target)
