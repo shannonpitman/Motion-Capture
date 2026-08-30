@@ -1,0 +1,9 @@
+# Claude Code local state
+.claude/
+.claude.json
+
+# Working notes - kept on disk, not in the record
+NOTES.md
+
+# macOS
+.DS_Store
