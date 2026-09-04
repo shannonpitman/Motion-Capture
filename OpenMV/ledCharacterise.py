@@ -26,7 +26,7 @@ import time
 import math
 
 # --- what you change between rows ------------------------------------------
-EXPOSURE_US = 386     # retarget per row - see "next exposure" in the output
+EXPOSURE_US = 100     # retarget per row - see "next exposure" in the output
 SAMPLES = 200         # frames per measurement
 
 # --- hold these constant ----------------------------------------------------
