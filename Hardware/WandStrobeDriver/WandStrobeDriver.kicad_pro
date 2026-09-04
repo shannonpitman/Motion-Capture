@@ -1,0 +1,25 @@
+{
+  "board": {},
+  "boards": [],
+  "cvpcb": {
+    "equivalence_files": []
+  },
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "WandStrobeDriver.kicad_pro",
+    "version": 3
+  },
+  "net_settings": {},
+  "pcbnew": {},
+  "schematic": {},
+  "sheets": [
+    [
+      "07f93fa4-9006-6616-3a8e-9e62404ba91e",
+      "Root"
+    ]
+  ],
+  "text_variables": {}
+}

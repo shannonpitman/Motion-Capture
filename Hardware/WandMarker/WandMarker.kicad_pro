@@ -1,0 +1,25 @@
+{
+  "board": {},
+  "boards": [],
+  "cvpcb": {
+    "equivalence_files": []
+  },
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "WandMarker.kicad_pro",
+    "version": 3
+  },
+  "net_settings": {},
+  "pcbnew": {},
+  "schematic": {},
+  "sheets": [
+    [
+      "7c7687c7-070c-a613-c777-3aadaceefaeb",
+      "Root"
+    ]
+  ],
+  "text_variables": {}
+}
