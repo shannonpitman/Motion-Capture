@@ -185,6 +185,53 @@ once `R2` is set, because the camera in Regime B sees the peak, not the average.
 Probe `TP1` (gate) against `TP3` (GND) on a scope before connecting any LED — that
 confirms period and pulse width on their own.
 
+## Breadboard variant — N-channel low side
+
+The PCB uses a P-channel high-side switch. If the only MOSFETs to hand are
+N-channel (IRF540N, IRF1010E), the bench build changes topology but nothing
+optical or timing-related, so it still verifies what the breadboard is for.
+
+**Move the switch to the low side.** All four marker grounds go to the FET
+drain; source to GND; gate from the 555 through `R3`. An N-channel conducts
+when the gate is **high**, so the flash must now be the OUT-**high** state —
+the opposite of the PCB — which means the diode across R2 is now required.
+
+| | PCB (P-ch high side) | Breadboard (N-ch low side) |
+|---|---|---|
+| `R1` charge path | 1 M | **3k3** |
+| `R2` discharge | 3k3 | **1 M** |
+| Diode across `R2` | none | **1N4148**, anode at DISCH, cathode at THR/TRIG |
+| LEDs lit when OUT is | low | **high** |
+
+Swap the two resistor values and add the diode. Timing comes out the same:
+`t_on = 0.693 · 3k3 · 470n = 1075 µs`, `f = 3.06 Hz`, duty 0.33 %.
+
+**What it costs.** During the 326 ms off-time the DISCH pin sinks `Vcc/R1` =
+**2.7 mA** continuously, so the board goes from 1.9 mA to 4.6 mA average —
+about 540 h on 6×AA instead of 1300. Fine for bench work, which is why the
+PCB keeps the P-channel version.
+
+(An earlier note in this file put that penalty at ~20 mA. That figure was for
+rev A's 12 V rail and 300 µs pulse, where `R1` would have been ~920 Ω. At rev
+B's 9 V and 1075 µs, `R1` is 3k3 and the penalty is 2.7 mA.)
+
+**Headroom is unchanged** — 11 mV across an IRF540N at 144 mA against 10 mV
+for the P-channel part. Both are irrelevant.
+
+**What you lose:** with low-side switching the marker returns are no longer
+permanently grounded, so the "a chafed wire against the frame is a non-event"
+property goes away. Irrelevant on an isolated breadboard; it is one of the
+reasons the PCB stays high-side.
+
+Either FET works. Prefer the **IRF540N** — 71 nC of gate charge against the
+IRF1010E's ~130 nC, and it only needs ~4 V of gate to pass 144 mA, so the
+TLC555 drives it directly through `R3` with a few microseconds of edge against
+a 1075 µs pulse. V_GS(th) is 2.0–4.0 V and V_GS max is ±20 V, so a 9 V swing
+turns it hard on and stays well inside the gate rating.
+
+**TO-220 tab is the DRAIN on both parts.** Low side, that puts the tab on the
+marker-return node, not ground — keep it clear of anything earthed.
+
 ## Two parts you must not substitute casually
 
 **Q1 (driver).** `DMP3098L-7` — **P-channel enhancement mode**, SOT-23
