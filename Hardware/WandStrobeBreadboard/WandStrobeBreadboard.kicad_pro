@@ -1,0 +1,25 @@
+{
+  "board": {},
+  "boards": [],
+  "cvpcb": {
+    "equivalence_files": []
+  },
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "WandStrobeBreadboard.kicad_pro",
+    "version": 3
+  },
+  "net_settings": {},
+  "pcbnew": {},
+  "schematic": {},
+  "sheets": [
+    [
+      "3f7365a1-4da8-0edb-f907-4c8655358c88",
+      "Root"
+    ]
+  ],
+  "text_variables": {}
+}
