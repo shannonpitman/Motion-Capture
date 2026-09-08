@@ -178,6 +178,13 @@ class Sch:
                 '\t\t(color 0 0 0 0)\n\t\t(uuid "%s")\n\t)'
                 % (_n(p[0]), _n(p[1]), self._uid("j")))
 
+    def no_connect(self, *pts):
+        """Mark a pin deliberately unused, so ERC stays clean."""
+        for p in (snap(q) for q in pts):
+            self.items.append(
+                '\t(no_connect\n\t\t(at %s %s)\n\t\t(uuid "%s")\n\t)'
+                % (_n(p[0]), _n(p[1]), self._uid("nc")))
+
     def label(self, name, at, rot=0, just="left bottom"):
         at = snap(at)
         self.items.append(
