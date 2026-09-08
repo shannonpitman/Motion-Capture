@@ -2,11 +2,11 @@
 	(version 20250114)
 	(generator "eeschema")
 	(generator_version "9.0")
-	(uuid "07f93fa4-9006-6616-3a8e-9e62404ba91e")
+	(uuid "3f7365a1-4da8-0edb-f907-4c8655358c88")
 	(paper "A3")
 	(title_block
-		(title "Wand strobe driver - TLC555 + high-side P-FET, 9 V")
-		(rev "B")
+		(title "Wand strobe driver - BREADBOARD variant, N-channel low side, 9 V")
+		(rev "B-bb")
 		(company "UCT MSc - Shannon Pitman")
 	)
 	(lib_symbols
@@ -606,6 +606,194 @@
 				(at 0 -3.81 90)
 				(length 2.794)
 				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+	(symbol "Device:D"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "D"
+			(at 0 2.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "D"
+			(at 0 -2.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Diode"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "diode"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "D_0_1"
+			(polyline
+				(pts
+					(xy -1.27 1.27) (xy -1.27 -1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 0) (xy -1.27 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "D_1_1"
+			(pin passive line
+				(at -3.81 0 0)
+				(length 2.54)
+				(name "K"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 2.54)
+				(name "A"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1726,7 +1914,7 @@
 			)
 		)
 	)
-	(symbol "Transistor_FET:Q_PMOS_GSD"
+	(symbol "Transistor_FET:Q_NMOS_GSD"
 		(pin_names
 			(offset 0)
 			(hide yes)
@@ -1747,7 +1935,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Q_PMOS_GSD"
+		(property "Value" "Q_NMOS_GSD"
 			(at 5.08 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1780,7 +1968,7 @@
 				)
 			)
 		)
-		(property "Description" "P-MOSFET transistor, gate/source/drain"
+		(property "Description" "N-MOSFET transistor, gate/source/drain"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1791,7 +1979,7 @@
 				)
 			)
 		)
-		(property "ki_keywords" "transistor PMOS P-MOS P-MOSFET"
+		(property "ki_keywords" "transistor NMOS N-MOS N-MOSFET"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1802,7 +1990,7 @@
 				)
 			)
 		)
-		(symbol "Q_PMOS_GSD_0_1"
+		(symbol "Q_NMOS_GSD_0_1"
 			(polyline
 				(pts
 					(xy 0.254 1.905) (xy 0.254 -1.905)
@@ -1841,18 +2029,6 @@
 			)
 			(polyline
 				(pts
-					(xy 0.762 1.778) (xy 3.302 1.778) (xy 3.302 -1.778) (xy 0.762 -1.778)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
 					(xy 0.762 0.508) (xy 0.762 -0.508)
 				)
 				(stroke
@@ -1875,6 +2051,30 @@
 					(type none)
 				)
 			)
+			(polyline
+				(pts
+					(xy 0.762 -1.778) (xy 3.302 -1.778) (xy 3.302 1.778) (xy 0.762 1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.016 0) (xy 2.032 0.381) (xy 2.032 -0.381) (xy 1.016 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
 			(circle
 				(center 1.651 0)
 				(radius 2.794)
@@ -1884,18 +2084,6 @@
 				)
 				(fill
 					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy 2.286 0) (xy 1.27 0.381) (xy 1.27 -0.381) (xy 2.286 0)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type outline)
 				)
 			)
 			(polyline
@@ -1946,7 +2134,7 @@
 			)
 			(polyline
 				(pts
-					(xy 2.921 -0.381) (xy 3.683 -0.381)
+					(xy 2.921 0.381) (xy 3.683 0.381)
 				)
 				(stroke
 					(width 0)
@@ -1958,7 +2146,7 @@
 			)
 			(polyline
 				(pts
-					(xy 3.302 -0.381) (xy 2.921 0.254) (xy 3.683 0.254) (xy 3.302 -0.381)
+					(xy 3.302 0.381) (xy 2.921 -0.254) (xy 3.683 -0.254) (xy 3.302 0.381)
 				)
 				(stroke
 					(width 0)
@@ -1969,7 +2157,7 @@
 				)
 			)
 		)
-		(symbol "Q_PMOS_GSD_1_1"
+		(symbol "Q_NMOS_GSD_1_1"
 			(pin input line
 				(at -5.08 0 0)
 				(length 2.54)
@@ -2545,7 +2733,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6d79829d-66a3-0d45-669e-786b616d54c3")
+		(uuid "e63a8730-5e44-3530-6822-a64b95b8b0f5")
 		(property "Reference" "J1"
 			(at 30.48 27.94 0)
 			(effects
@@ -2590,14 +2778,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "b0f0272a-777f-5412-c7cd-4bc1901efa37")
+			(uuid "4405b5da-43c9-fa79-d9a3-66892ab5f7f8")
 		)
 		(pin "2"
-			(uuid "b9b5963b-a438-f97d-e274-121541092af9")
+			(uuid "2edc07d7-9c3a-c9ff-95f3-486e561a084f")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "J1")
 					(unit 1)
 				)
@@ -2612,21 +2800,23 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "bc3a91d2-e238-4e34-09c9-795483211fdb")
+		(uuid "16032510-0d59-7013-2dac-f0f8bdaeec99")
 		(property "Reference" "SW1"
-			(at 48.26 30.48 0)
+			(at 50.8 36.83 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Value" "POWER"
-			(at 48.26 44.45 0)
+			(at 50.8 39.37 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Button_Switch_THT:SW_Slide_SPDT_Angled_CK_OS102011MA1Q"
@@ -2635,6 +2825,7 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -2644,6 +2835,7 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -2653,21 +2845,22 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 				(hide yes)
 			)
 		)
 		(pin "1"
-			(uuid "b3b70dca-bf85-03ae-7755-7fc5ac23cdda")
+			(uuid "17f3a8c3-1902-3ceb-50eb-31ceaf01669a")
 		)
 		(pin "2"
-			(uuid "5689348b-8142-b7c1-8a36-b264abe1b1d2")
+			(uuid "5622ff74-bc4e-b380-58a9-061a381abbad")
 		)
 		(pin "3"
-			(uuid "9fb81b6f-0e58-67a6-07ff-3f39a6d10a4e")
+			(uuid "29ac9910-02de-480c-c189-e355faf24b65")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "SW1")
 					(unit 1)
 				)
@@ -2682,7 +2875,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7df2113f-465e-594b-c319-1333ab9de78e")
+		(uuid "26140045-1da5-28e4-e936-87759414e62d")
 		(property "Reference" "F1"
 			(at 63.5 34.29 90)
 			(effects
@@ -2727,14 +2920,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "e700d3ef-64de-e289-deb0-3a5ffd8592bc")
+			(uuid "61b63397-9431-d0ae-870b-f58c0024c4b1")
 		)
 		(pin "2"
-			(uuid "4c7c9b65-0ef3-4869-4947-c7bc1ac570c9")
+			(uuid "023327aa-6437-418f-c2df-c72c5f6e3c0c")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "F1")
 					(unit 1)
 				)
@@ -2749,7 +2942,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f5da0825-0ae7-4c76-7e96-c97e66bf142d")
+		(uuid "b9c326d0-4abe-0596-8d96-139d82dd1e0d")
 		(property "Reference" "D1"
 			(at 80.01 34.29 0)
 			(effects
@@ -2758,7 +2951,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "1N5817"
 			(at 80.01 41.91 0)
 			(effects
 				(font
@@ -2766,7 +2959,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SMA"
+		(property "Footprint" "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal"
 			(at 80.01 38.1 0)
 			(effects
 				(font
@@ -2794,14 +2987,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "1d309350-dbce-936f-0c58-07585ca07b61")
+			(uuid "54c68068-7474-13ad-73ea-c13414d0ea4d")
 		)
 		(pin "2"
-			(uuid "a03cea51-13b4-56c9-c2d2-e84171e8847f")
+			(uuid "e09218d5-ca6e-0521-7e12-9b0c629d1c6a")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "D1")
 					(unit 1)
 				)
@@ -2816,7 +3009,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "ae2097b3-e27e-9f51-23d6-cabde7ccf679")
+		(uuid "8e8f6b07-0195-daab-2a8d-cf2894a55c33")
 	)
 	(wire
 		(pts
@@ -2826,7 +3019,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "8866f068-9ae8-8e7f-76ce-8793aac6d2a7")
+		(uuid "5f52b26d-5b7a-07da-98df-b1d3c91edfba")
 	)
 	(wire
 		(pts
@@ -2836,11 +3029,11 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "cc232c55-7b16-283c-351b-b32907ef8671")
+		(uuid "cd365bff-72e4-57a8-7dd5-069810b92711")
 	)
 	(no_connect
 		(at 53.34 40.64)
-		(uuid "26c34884-51ec-4f60-d9f5-339b5f40dae1")
+		(uuid "09479e63-3f57-8833-df3b-82e3f22ae4f3")
 	)
 	(wire
 		(pts
@@ -2850,7 +3043,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "cf97572e-1524-c34e-4542-129c56303e28")
+		(uuid "a0857f99-9bf2-4fc0-a863-20d082c59bfd")
 	)
 	(wire
 		(pts
@@ -2860,7 +3053,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "687adcc8-0bec-9264-a38f-bea7b3fd851e")
+		(uuid "ea1bbece-d493-daa0-3714-a6bf34f5daae")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -2870,7 +3063,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ad1ff982-7923-3a14-b25a-a4a7b38ff11e")
+		(uuid "b54c6bba-db01-9698-aca8-0c8eb8fd133c")
 		(property "Reference" "#PWR01"
 			(at 35.56 58.42 0)
 			(effects
@@ -2889,11 +3082,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "a868298d-6104-1691-e1ea-95b573166bd0")
+			(uuid "5e88ee28-029e-2702-7866-9137abc86983")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR01")
 					(unit 1)
 				)
@@ -2908,7 +3101,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "57266bf7-8232-fc99-1d24-6845a5237aa0")
+		(uuid "b7f3a64d-0eed-8d51-9a41-e75c82d73f2a")
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
@@ -2918,7 +3111,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8b65cafa-ad0d-e877-1155-35c9025d9de1")
+		(uuid "8ac661c5-4090-6f52-c24c-a565a1292ac8")
 		(property "Reference" "#FLG02"
 			(at 25.4 52.07 0)
 			(effects
@@ -2969,11 +3162,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "be1a1246-a923-2ef0-66f0-121608fd8df4")
+			(uuid "488fe780-c7a0-4f9d-e82c-a4cfce0019e2")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#FLG02")
 					(unit 1)
 				)
@@ -2984,7 +3177,7 @@
 		(at 35.56 53.34)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "ff804a92-c537-6275-8e2c-3ec4354dee22")
+		(uuid "2cfbc6a2-1db6-e715-5d24-a951e5e0379b")
 	)
 	(wire
 		(pts
@@ -2994,7 +3187,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "2bc721ae-e577-a3e0-9f20-23a8ba55e521")
+		(uuid "bf9f151b-f030-5bfa-3124-fd3ac229174b")
 	)
 	(symbol
 		(lib_id "Device:C_Polarized")
@@ -3004,7 +3197,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7dbf81c8-9d2a-43fc-9fc4-b9e3d1dd30df")
+		(uuid "4e7970b7-cc15-be0a-48d9-f1fb06623df0")
 		(property "Reference" "C1"
 			(at 109.22 49.53 0)
 			(effects
@@ -3054,14 +3247,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "89cfbc4f-6ad3-8743-87aa-ec12c0a9f6ea")
+			(uuid "91218cad-9dcb-1073-66f6-4ca0bc5796a3")
 		)
 		(pin "2"
-			(uuid "16a5cf06-2602-6ccd-3f94-95129950717b")
+			(uuid "b53c9b61-2072-e1be-b7dc-ed6141149ef2")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "C1")
 					(unit 1)
 				)
@@ -3076,7 +3269,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "84f2d4bd-cd14-c52d-6249-70f4484c20d2")
+		(uuid "5786accc-60d8-930a-d1eb-54d24cc97d0c")
 		(property "Reference" "C2"
 			(at 132.08 49.53 0)
 			(effects
@@ -3095,7 +3288,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 			(at 129.54 50.8 0)
 			(effects
 				(font
@@ -3126,14 +3319,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "1b5ecc30-173c-ff9f-8c0d-894a555f4792")
+			(uuid "4aa22582-c990-e409-66c5-abd77a20d3e2")
 		)
 		(pin "2"
-			(uuid "7fac8523-7039-b0cb-eb6a-5d6a728ac6f9")
+			(uuid "f9eeb0a9-1ae5-e45c-8a62-8a1d1f12eedb")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "C2")
 					(unit 1)
 				)
@@ -3148,7 +3341,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d397d435-7cae-338c-a8f8-8a72b651f337")
+		(uuid "f25542db-2035-9e3f-f8c7-589a0e529dca")
 		(property "Reference" "R5"
 			(at 154.94 49.53 0)
 			(effects
@@ -3167,7 +3360,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
 			(at 152.4 50.8 0)
 			(effects
 				(font
@@ -3198,14 +3391,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "a7a8fc24-3c80-f531-1066-bef4f9a20a5c")
+			(uuid "d7e5043f-d8c3-63d9-ae84-22c973459a63")
 		)
 		(pin "2"
-			(uuid "fd04592d-9022-070f-b0c0-2f0d7942aa9f")
+			(uuid "e3406390-b6e9-3293-28b7-9971b9ec8369")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "R5")
 					(unit 1)
 				)
@@ -3220,7 +3413,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "9c85a351-3698-1d4e-3709-f996a3b989a4")
+		(uuid "59bd414b-91b4-5074-e5c1-6e8e7c9e56f7")
 		(property "Reference" "D2"
 			(at 163.83 63.5 90)
 			(effects
@@ -3237,7 +3430,7 @@
 				)
 			)
 		)
-		(property "Footprint" "LED_SMD:LED_0805_2012Metric"
+		(property "Footprint" "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal"
 			(at 152.4 64.77 90)
 			(effects
 				(font
@@ -3265,14 +3458,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "db253256-6826-0445-89b8-3693793fe7e6")
+			(uuid "23c38402-9b77-d5b0-88b0-c8044ed981de")
 		)
 		(pin "2"
-			(uuid "875b8081-468e-d68e-355c-09948e331111")
+			(uuid "201f1c2e-0254-c688-b5ac-657407d4a836")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "D2")
 					(unit 1)
 				)
@@ -3287,7 +3480,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a5de3113-5a8f-4a69-a469-1d005f35ac2e")
+		(uuid "711f4601-0a5d-edc0-cb3e-63058fb56675")
 	)
 	(wire
 		(pts
@@ -3297,7 +3490,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "035cbc3e-e0d1-be10-1ed2-c568a999371f")
+		(uuid "4907df37-80c4-7c5f-2f2c-b79692d0e2b5")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -3307,7 +3500,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "4a50fb64-f918-10a7-486b-495df32342a8")
+		(uuid "518ebaae-5064-a95e-bf5d-2928f1f87ccc")
 		(property "Reference" "#PWR02"
 			(at 106.68 60.96 0)
 			(effects
@@ -3326,11 +3519,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "1da21129-95e6-63cd-8678-9a6d10d64374")
+			(uuid "59b9916a-3582-9efa-281e-995ef66a07a6")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR02")
 					(unit 1)
 				)
@@ -3345,7 +3538,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bacf670f-e292-322e-e809-80237f0122fe")
+		(uuid "e845fc1d-9825-36a9-28e0-c8390924b7f5")
 	)
 	(wire
 		(pts
@@ -3355,7 +3548,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "37a3586b-477f-902f-1b57-5ece69849a67")
+		(uuid "761a32d3-5176-9e70-e3f9-9201f1de6728")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -3365,7 +3558,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "847c9d78-0e3f-3716-fa60-a25b28a7cb20")
+		(uuid "532724c7-8a31-731e-80fa-d5414cdaa28f")
 		(property "Reference" "#PWR03"
 			(at 129.54 60.96 0)
 			(effects
@@ -3384,11 +3577,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "d6bdbff5-af2c-dc42-da06-32d0363a35b3")
+			(uuid "cf14def2-4447-6fce-dffa-8ac9af3d12fb")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR03")
 					(unit 1)
 				)
@@ -3403,7 +3596,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "761c34af-b8ab-8fdf-26d5-7ce89795d35f")
+		(uuid "bddfccba-a58b-c00a-e2f6-80da9c5bd7ca")
 	)
 	(wire
 		(pts
@@ -3413,7 +3606,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "06908902-53a9-3be3-0364-eb4da047b41e")
+		(uuid "f38679e9-ee80-4304-610f-121630eb592e")
 	)
 	(wire
 		(pts
@@ -3423,7 +3616,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "dda1221c-f6ba-d3cf-3216-c306c3a6d2e7")
+		(uuid "310283e6-c7d9-82fd-d227-b1f69246f531")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -3433,7 +3626,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "91d6d32d-c498-aaa2-b7dc-1278aaf48dd2")
+		(uuid "9b88a2ba-cfce-e7bf-746c-9c3a86c215e0")
 		(property "Reference" "#PWR04"
 			(at 152.4 74.93 0)
 			(effects
@@ -3452,11 +3645,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "199210c3-d552-7785-043d-033eb17c4b34")
+			(uuid "cb81213f-5c39-c002-c105-aa3c3833e37a")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR04")
 					(unit 1)
 				)
@@ -3471,7 +3664,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "ad5dde1d-e24d-d7a5-b430-6af6d8c35bf2")
+		(uuid "5818c9c5-3794-b085-a3d3-1aab41d5e504")
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
@@ -3481,7 +3674,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1ad32ca3-f37a-e921-a1ba-043aea985f9b")
+		(uuid "e88b48a1-13ba-c615-d428-4e1473569ee9")
 		(property "Reference" "#FLG01"
 			(at 177.8 29.21 0)
 			(effects
@@ -3532,11 +3725,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "3af9a0a3-b5fe-27ab-7216-beff213337cd")
+			(uuid "b87ab0d3-96c7-6459-de85-8b68ca71d4c0")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#FLG01")
 					(unit 1)
 				)
@@ -3551,7 +3744,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "321c4bf7-569f-2b48-8ea6-2bb7e9d85ea2")
+		(uuid "f4752839-63e9-a70a-578e-05f4e3345304")
 	)
 	(symbol
 		(lib_id "power:+9V")
@@ -3561,7 +3754,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "9a8e9d1d-e87c-16af-41ef-5345320b2c5a")
+		(uuid "9c1d0f40-3897-3007-c790-f5a93e6a03f6")
 		(property "Reference" "#PWR05"
 			(at 190.5 30.48 0)
 			(effects
@@ -3580,11 +3773,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "8d618739-4598-e9d3-d748-f3772b279912")
+			(uuid "c2151864-fd82-c9ce-4727-3a420c84f4ad")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR05")
 					(unit 1)
 				)
@@ -3595,31 +3788,31 @@
 		(at 106.68 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "fa103225-381e-ac5f-b09e-6c5e407b477b")
+		(uuid "3e25455d-471a-0df9-a441-26bbfb6811b1")
 	)
 	(junction
 		(at 129.54 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "1ea66fd6-b681-15f0-c63d-b4e9da00efaa")
+		(uuid "13b185fc-d6c3-4dc5-4e3e-2b594a3890b9")
 	)
 	(junction
 		(at 152.4 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "d9b0fe1c-7b4b-8e90-b774-bbcad7dbc139")
+		(uuid "0aa41947-3a7f-a97d-35f6-602044861505")
 	)
 	(junction
 		(at 175.26 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "8f32b3f2-816d-6e92-b40e-5c17fcd29be2")
+		(uuid "de14e159-b54d-0ed8-16a2-f8ed4c04170c")
 	)
 	(junction
 		(at 190.5 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "24899403-dff5-7e9b-8d2f-017da88a9dca")
+		(uuid "ba78043b-9467-f26b-dc5d-d57b294a6099")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -3629,7 +3822,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1cad3275-2037-0784-66c6-daeee9e5e407")
+		(uuid "160b6e6e-0b5e-4d9a-bdcc-50c569a55dd9")
 		(property "Reference" "R10"
 			(at 215.9 34.29 90)
 			(effects
@@ -3646,7 +3839,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
 			(at 215.9 38.1 90)
 			(effects
 				(font
@@ -3674,14 +3867,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "d321bf57-0674-34bb-816a-5faa8b3d4c04")
+			(uuid "44269629-2059-a027-fa42-619a713735d2")
 		)
 		(pin "2"
-			(uuid "dcc2b387-8262-b55c-5312-623be290dd54")
+			(uuid "4fa17357-297c-121e-b821-5633bd2460f6")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "R10")
 					(unit 1)
 				)
@@ -3696,7 +3889,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3bcba9b3-1aa3-38a4-3b06-d962950931da")
+		(uuid "050787d9-9bcb-40b7-f11a-30601ac283a1")
 	)
 	(symbol
 		(lib_id "Device:C_Polarized")
@@ -3706,7 +3899,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "23a4cec0-239c-b4cd-c67b-39a71158d017")
+		(uuid "bad1578a-6c35-626f-3b21-fdfa748cb25e")
 		(property "Reference" "C3"
 			(at 243.84 49.53 0)
 			(effects
@@ -3756,14 +3949,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "13e303e7-8dac-3dc9-9915-89c4565b1a8e")
+			(uuid "ee35b967-68dd-9470-824f-04ce125732eb")
 		)
 		(pin "2"
-			(uuid "4fac7337-9cc9-4c80-d427-04ca56bcf555")
+			(uuid "e59df586-e223-ce5c-5fd1-de9ee7178103")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "C3")
 					(unit 1)
 				)
@@ -3778,7 +3971,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "754456d9-1c46-6887-6205-c45167e9d99f")
+		(uuid "76490065-fc60-e765-6272-5c1840c69c36")
 		(property "Reference" "C4"
 			(at 266.7 49.53 0)
 			(effects
@@ -3797,7 +3990,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 			(at 264.16 50.8 0)
 			(effects
 				(font
@@ -3828,14 +4021,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "394322fc-6d40-54ea-775b-00e87c99598d")
+			(uuid "87b9834b-1518-52cf-5b2a-9fd71fb1cbc4")
 		)
 		(pin "2"
-			(uuid "5434c6fd-0d32-b639-8cc5-8f4d34e2f17e")
+			(uuid "bac28a9a-d7bf-95fa-025f-2587372633bb")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "C4")
 					(unit 1)
 				)
@@ -3850,7 +4043,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "78e0e33e-abde-3e35-538a-ae4825977239")
+		(uuid "ffbf9b9c-e519-c618-b436-6009536ac1d5")
 	)
 	(wire
 		(pts
@@ -3860,7 +4053,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "cf7942f7-5ed6-a792-3ba8-6bd836362230")
+		(uuid "5b458ab9-0e24-0d14-f044-f11aa042aac0")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -3870,7 +4063,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "4e08ffe2-f865-7425-a986-c6466ec674f9")
+		(uuid "dc2e5209-7d06-dcfe-b85b-41eaabd20e66")
 		(property "Reference" "#PWR06"
 			(at 241.3 60.96 0)
 			(effects
@@ -3889,11 +4082,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "28611234-51f2-8c21-0fac-5136d7fbd20b")
+			(uuid "89875398-741d-5336-d08d-75639c905d6b")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR06")
 					(unit 1)
 				)
@@ -3908,7 +4101,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7b949652-48e9-b2c3-d858-72547ac13f4c")
+		(uuid "61a0f6cf-3252-dbfd-254c-3cc98ccb7afa")
 	)
 	(wire
 		(pts
@@ -3918,7 +4111,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "85de7f04-8332-6a5c-0607-592aecddae83")
+		(uuid "7c9c594f-7234-e895-ae41-f276d96b9f2a")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -3928,7 +4121,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "151c7a24-bbbe-0e92-8906-e1a526495ef2")
+		(uuid "eb3d84db-b6df-c03c-20d3-d7a0287e7ca2")
 		(property "Reference" "#PWR07"
 			(at 264.16 60.96 0)
 			(effects
@@ -3947,11 +4140,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "91493d08-6e0f-65d8-fff6-6dbef6bfd61f")
+			(uuid "593bd845-0338-2453-db8c-00162d36d540")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR07")
 					(unit 1)
 				)
@@ -3966,7 +4159,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f42aeb5e-85aa-12c2-d970-a7a8c8f65e10")
+		(uuid "2b544b8e-1ccd-8f4e-252a-df62135d4174")
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
@@ -3976,7 +4169,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3fee1dac-cfd8-76ff-14b0-efdee5270f5f")
+		(uuid "51d0a661-6657-5f7f-3832-bb4e857b0dbf")
 		(property "Reference" "#FLG03"
 			(at 278.13 29.21 0)
 			(effects
@@ -4027,11 +4220,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "646ceadd-db60-7c8b-b64e-a2ab4896d40f")
+			(uuid "4ae8a22f-3d8c-59c1-4805-6c2ca25b06e1")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#FLG03")
 					(unit 1)
 				)
@@ -4046,7 +4239,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d45ca602-0d20-9e99-b14e-725c3c6f417e")
+		(uuid "d7cb23fe-9143-8894-b7e3-3ed512957c37")
 	)
 	(symbol
 		(lib_id "power:VCC")
@@ -4056,7 +4249,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "99076e5a-dcb7-f0d6-573a-decb2bdb35d7")
+		(uuid "c2257dea-7eeb-5a84-82e5-a712c0b93533")
 		(property "Reference" "#PWR08"
 			(at 295.91 30.48 0)
 			(effects
@@ -4075,11 +4268,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "a14f5c7d-8241-32cd-a232-9f9bbfd524a5")
+			(uuid "4cec4cb7-105a-0dd7-954a-9adc24ba5b22")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR08")
 					(unit 1)
 				)
@@ -4090,19 +4283,19 @@
 		(at 241.3 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "7c7038f7-377c-4052-08dc-8753b99107bf")
+		(uuid "70efe4e9-f2d6-b099-a7a3-87f4871077ba")
 	)
 	(junction
 		(at 264.16 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "efceee82-38d1-8f55-5fe4-e6a70d85677e")
+		(uuid "84bdb2b4-b535-eadb-b7ab-086802b5e834")
 	)
 	(junction
 		(at 275.59 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "455d8081-c882-c8e1-6020-b26094d0c6fb")
+		(uuid "b5722dcb-e62d-6098-9ea1-14c2d86988c8")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -4112,7 +4305,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "bb7ea81a-b7e5-1d6a-83d5-cc369d2bbb4c")
+		(uuid "2f916473-3ff1-8569-f6b7-8c45e37ad3d9")
 		(property "Reference" "R1"
 			(at 58.42 93.98 0)
 			(effects
@@ -4122,7 +4315,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "1M"
+		(property "Value" "3k3"
 			(at 58.42 96.52 0)
 			(effects
 				(font
@@ -4162,14 +4355,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "e790bb52-8363-ae90-55bb-a2b9c84cfe13")
+			(uuid "06f4579a-8648-6442-071c-a52d95ddf31a")
 		)
 		(pin "2"
-			(uuid "587ad5af-ad19-e1a7-ec36-6cbf01b952f6")
+			(uuid "84773747-3961-6ee2-e8ad-7adf727643d6")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "R1")
 					(unit 1)
 				)
@@ -4184,23 +4377,23 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6eff85d6-05cd-2a5f-f906-499f90878671")
+		(uuid "3ad090dd-1107-9ab1-db3b-edfeef9c1cfc")
 		(property "Reference" "R2"
-			(at 58.42 111.76 0)
+			(at 63.5 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
-		(property "Value" "3k3"
-			(at 58.42 114.3 0)
+		(property "Value" "1M"
+			(at 63.5 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
@@ -4209,7 +4402,7 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -4219,7 +4412,7 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -4229,20 +4422,87 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 				(hide yes)
 			)
 		)
 		(pin "1"
-			(uuid "d4e029fb-2ac5-7235-301f-8a282206cccd")
+			(uuid "1596170c-eb05-67a9-ba5d-2daa59c449ff")
 		)
 		(pin "2"
-			(uuid "27142412-a925-4713-d89d-6f53e7a9863b")
+			(uuid "54cb10eb-f164-9982-f3a9-b3806177b1d1")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "R2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:D")
+		(at 48.26 113.03 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9a927a6e-0e0e-070c-0e37-e16d8c0f20b1")
+		(property "Reference" "D3"
+			(at 34.29 111.76 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1N4148"
+			(at 34.29 114.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Diode_THT:D_DO-35_SOD27_P10.16mm_Horizontal"
+			(at 48.26 113.03 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 48.26 113.03 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 48.26 113.03 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2118cc78-3f00-3691-9720-ef047d33c4a0")
+		)
+		(pin "2"
+			(uuid "1c3fe65a-e0f3-e1f1-b0cf-5992dd962f34")
+		)
+		(instances
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
+					(reference "D3")
 					(unit 1)
 				)
 			)
@@ -4256,7 +4516,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "dd34143e-5f03-9c21-0b20-4d187be57065")
+		(uuid "cf844f18-5fe0-fd63-d02c-dfbc0909b9c7")
 		(property "Reference" "C6"
 			(at 58.42 128.27 0)
 			(effects
@@ -4306,14 +4566,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "8cfe1e0b-6be3-359c-aae9-82af25e41801")
+			(uuid "690d0425-e81d-3c2f-b6f0-02d082d846d5")
 		)
 		(pin "2"
-			(uuid "524cd359-5d74-5a25-7856-32033777380c")
+			(uuid "8e3cbcaa-220e-9110-5028-9cae53fbea21")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "C6")
 					(unit 1)
 				)
@@ -4328,7 +4588,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "47819393-7ca4-726d-4f1d-4f02ca820b19")
+		(uuid "8decb2ae-b1ab-f82d-2c3b-22e52d2ecad2")
 	)
 	(symbol
 		(lib_id "power:VCC")
@@ -4338,7 +4598,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b4d19f4e-345e-933c-7160-9af47bb12054")
+		(uuid "59eb2394-f86d-765f-445d-09fa07f8d322")
 		(property "Reference" "#PWR09"
 			(at 60.96 85.09 0)
 			(effects
@@ -4357,11 +4617,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "bb98eb37-e135-c061-d6da-295d83dc387d")
+			(uuid "15893746-11a8-864a-b33b-7c0e37359e61")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR09")
 					(unit 1)
 				)
@@ -4376,7 +4636,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "2c2954f0-c01b-e877-96ee-70d417969317")
+		(uuid "d30e6240-83b3-2feb-5816-f27d299d75ef")
 	)
 	(wire
 		(pts
@@ -4386,7 +4646,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "ebef39f0-6d3e-7c50-cff7-22c884ff4d1d")
+		(uuid "7c6da031-e852-c0cf-43e2-306c71cdb2a9")
 	)
 	(wire
 		(pts
@@ -4396,7 +4656,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "12e10026-fab1-c20e-47ba-e79fd9a9804b")
+		(uuid "a2459763-b473-48a6-363d-8e4a808fd19c")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -4406,7 +4666,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e0a2c071-bade-8733-e301-ac718f2bea84")
+		(uuid "9b68065d-82dc-eca0-5e5d-55c941975472")
 		(property "Reference" "#PWR10"
 			(at 60.96 140.97 0)
 			(effects
@@ -4425,16 +4685,48 @@
 			)
 		)
 		(pin "1"
-			(uuid "bc6fe159-7820-14f7-4b49-45afa97d64c2")
+			(uuid "55da7d85-cb64-e8b1-8e60-cbd94bba90d4")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR10")
 					(unit 1)
 				)
 			)
 		)
+	)
+	(wire
+		(pts
+			(xy 48.26 109.22) (xy 60.96 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8cf3d738-1c61-9ce7-e6ac-e85b74cc2713")
+	)
+	(wire
+		(pts
+			(xy 48.26 116.84) (xy 60.96 116.84)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67b1da08-3c79-25f9-9c7d-a16e9cb051bc")
+	)
+	(junction
+		(at 60.96 109.22)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b8435368-b23e-993c-de4b-005cbbc7026e")
+	)
+	(junction
+		(at 60.96 116.84)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b2c2d88c-2eca-d839-9383-d896cc37e17a")
 	)
 	(symbol
 		(lib_id "Timer:TLC555xP")
@@ -4444,7 +4736,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "574c202c-a296-7d75-0513-f2e949456050")
+		(uuid "02e9f0e0-a37c-369b-ce4f-a4c1522ef851")
 		(property "Reference" "U1"
 			(at 121.92 113.03 0)
 			(effects
@@ -4494,32 +4786,32 @@
 			)
 		)
 		(pin "1"
-			(uuid "38304445-561a-a4e2-4e92-ae32ffd59ec6")
+			(uuid "8bacb7dc-5cc8-1465-e3d9-bd045aab8841")
 		)
 		(pin "2"
-			(uuid "e911a48f-e713-180a-daa3-066de255fb25")
+			(uuid "3de39b37-a2c0-d83d-e9b3-83f12e4620af")
 		)
 		(pin "3"
-			(uuid "c7c396c2-6f25-cc34-5593-579666b6259d")
+			(uuid "be34087f-81c9-7c6a-6804-ee49e32c1bd5")
 		)
 		(pin "4"
-			(uuid "29400dd5-62ef-d734-9060-363a8fa8d894")
+			(uuid "2e094712-0364-78cd-8ea6-26b929307eb7")
 		)
 		(pin "5"
-			(uuid "521ee12b-a545-dc63-5714-e94329923d55")
+			(uuid "b18a9489-6b90-cf82-8d42-07d7d7ba6510")
 		)
 		(pin "6"
-			(uuid "781540cb-105d-990d-d4d6-075a75b4a7ae")
+			(uuid "2f702250-7c50-730b-9d5d-ba876a29056a")
 		)
 		(pin "7"
-			(uuid "98cc6712-a28a-f8c0-6061-d817009a7ca4")
+			(uuid "b6d3b496-685f-2e62-d6eb-9fca7c73e292")
 		)
 		(pin "8"
-			(uuid "98be0352-ac9d-4a95-1fba-eeb2e97b95d3")
+			(uuid "59738ee6-6d9b-f39c-bf78-2119805b2cf1")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "U1")
 					(unit 1)
 				)
@@ -4534,7 +4826,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "188cbbc5-6041-f4f3-7044-bd442681edac")
+		(uuid "bd9786c6-66e1-8e75-43e1-7e16f228c977")
 	)
 	(wire
 		(pts
@@ -4544,7 +4836,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "5f6b17a5-87c1-04ee-3a8b-53b80f712c53")
+		(uuid "7bf0373c-7406-8abc-120c-4e96d2976152")
 	)
 	(wire
 		(pts
@@ -4554,13 +4846,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "345e2f75-35fd-25f4-b4e3-f282cf1c0899")
+		(uuid "db766201-ef1b-b23c-13a1-c35a4764a886")
 	)
 	(junction
 		(at 60.96 104.14)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "8b81cba2-de90-51db-43bf-7dd4333b8681")
+		(uuid "803e144c-08d7-f4f3-8ff3-747deef6bbf0")
 	)
 	(wire
 		(pts
@@ -4570,7 +4862,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3b667e38-7c08-3ef4-506e-11c7e7306e31")
+		(uuid "20c59433-63a5-9db9-7792-04806c573180")
 	)
 	(wire
 		(pts
@@ -4580,7 +4872,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "82328985-1457-a876-7d44-2c6723078a3f")
+		(uuid "17256054-92cd-c984-64d3-727ceb8b4512")
 	)
 	(wire
 		(pts
@@ -4590,7 +4882,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a5707081-7186-f234-d670-769a0404ab67")
+		(uuid "0810d2e6-4e4f-7a85-7927-355209bfe8bd")
 	)
 	(wire
 		(pts
@@ -4600,19 +4892,19 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "31766508-77d1-0004-cb54-b4f8d8137a58")
+		(uuid "b808e275-303c-620f-eb15-45f8d35f0680")
 	)
 	(junction
 		(at 60.96 121.92)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "fa415891-551e-dd99-ab2d-42f09c0fc49f")
+		(uuid "fd572dc2-36f0-e1f2-e5f4-bf871a926b75")
 	)
 	(junction
 		(at 88.9 124.46)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "83599ce2-ae64-db33-5e9c-af19e468fa9e")
+		(uuid "f2a9deb7-289b-065c-f054-886d90af09ff")
 	)
 	(wire
 		(pts
@@ -4622,7 +4914,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3f768945-22aa-10ed-5377-152aeaaae3fa")
+		(uuid "8695efb6-b566-fa68-21b9-c6cdccffc23e")
 	)
 	(wire
 		(pts
@@ -4632,7 +4924,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "de089023-6d5f-2825-728b-fd8f5e44f063")
+		(uuid "72868a63-37f7-c089-e84b-eac98c2ee96e")
 	)
 	(symbol
 		(lib_id "power:VCC")
@@ -4642,7 +4934,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d716ff72-86fb-c5cb-e5aa-acb31ce0b322")
+		(uuid "5c17d56c-d191-1da5-4864-a57ec65303ca")
 		(property "Reference" "#PWR11"
 			(at 93.98 105.41 0)
 			(effects
@@ -4661,11 +4953,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "33da66c5-f6a4-7080-ed3e-c0181e79be18")
+			(uuid "241b0d2d-533e-813e-ce23-65842638e50d")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR11")
 					(unit 1)
 				)
@@ -4680,7 +4972,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "bc03d42f-63ef-1e6c-70f3-598c6fcbc4ca")
+		(uuid "75118e9c-57e0-4108-1cff-2f3be56cde26")
 		(property "Reference" "C5"
 			(at 101.6 95.25 0)
 			(effects
@@ -4699,7 +4991,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 			(at 104.14 96.52 0)
 			(effects
 				(font
@@ -4730,14 +5022,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "99a6ee7a-dfb4-ab02-f89d-1d77d198726a")
+			(uuid "27d75f65-7723-05db-2cd0-8cba1b2046e8")
 		)
 		(pin "2"
-			(uuid "e680e547-3e86-7bf8-966d-3284677a2046")
+			(uuid "1c8e8d97-9a4b-1530-6b3a-9685363d431f")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "C5")
 					(unit 1)
 				)
@@ -4752,7 +5044,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "54a72edc-003d-a906-72f6-77d448868653")
+		(uuid "ae2a6ebb-984d-7a62-0980-02e31ee0e763")
 	)
 	(wire
 		(pts
@@ -4762,7 +5054,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "91c7744d-aa8b-5dc5-2a3e-1a4c534ac38a")
+		(uuid "8f95ae0c-f0fd-1416-6d47-68f5a9b3817a")
 	)
 	(wire
 		(pts
@@ -4772,7 +5064,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9b2daf00-fed1-8e19-a084-686a5381763d")
+		(uuid "18e71585-2c62-4f7c-7dcc-451f24392cbe")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -4782,7 +5074,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7743f8d9-cf19-0d21-1261-0db54c7e2ae1")
+		(uuid "c779b69a-3498-58c8-5052-c04cf795151d")
 		(property "Reference" "#PWR12"
 			(at 104.14 85.09 0)
 			(effects
@@ -4801,11 +5093,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "d9046b38-ae56-b93f-7471-892eb80a4240")
+			(uuid "ed3573f1-2fa0-6900-519d-23badce6d780")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR12")
 					(unit 1)
 				)
@@ -4820,7 +5112,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3b8d21e3-164b-6a7c-d1be-1b9c8769be7b")
+		(uuid "d971486c-7a83-e243-787e-419ecd98c5f3")
 	)
 	(symbol
 		(lib_id "power:VCC")
@@ -4830,7 +5122,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "68e144ed-44cb-8812-9297-017976cd6e92")
+		(uuid "12dbf3bc-da6a-21d0-e75b-f662df8fdd51")
 		(property "Reference" "#PWR13"
 			(at 111.76 99.06 0)
 			(effects
@@ -4849,11 +5141,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "0d6c48fe-aba6-8b49-5eae-aa615fe1f782")
+			(uuid "5ae700dd-1e64-ba7e-80a0-6fdaa1e31c13")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR13")
 					(unit 1)
 				)
@@ -4868,7 +5160,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "0e2e636f-7b5b-95e3-6985-315bce0be275")
+		(uuid "c9b4a963-e0be-7e53-a598-06b4a7f81961")
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -4878,7 +5170,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8c4ba615-9dcb-9285-7540-330b5f72c060")
+		(uuid "75d6a900-d8c5-ebef-f79b-90e2851878c6")
 		(property "Reference" "#PWR14"
 			(at 109.22 138.43 0)
 			(effects
@@ -4897,36 +5189,16 @@
 			)
 		)
 		(pin "1"
-			(uuid "3ad5079d-4201-4f31-670c-860db612653f")
+			(uuid "365911bd-84b2-69e8-5b28-0eff3cdce80a")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR14")
 					(unit 1)
 				)
 			)
 		)
-	)
-	(wire
-		(pts
-			(xy 119.38 121.92) (xy 142.24 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b0b89049-8bdd-6909-9930-e6f22fc28fde")
-	)
-	(label "GATE"
-		(at 142.24 121.92 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "71b0ec83-0b89-ff7e-fd67-397ab493a6da")
 	)
 	(wire
 		(pts
@@ -4936,7 +5208,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9d6b08b8-950b-188b-f08e-5ecb94cf4c28")
+		(uuid "3ed8d624-830f-e181-d3d7-443b68b4d102")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -4946,7 +5218,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d794de1d-6c78-fe34-9755-adc5256e5aee")
+		(uuid "1daa2467-0aab-61f9-3068-f242e8ae7af9")
 		(property "Reference" "TP1"
 			(at 135.89 111.76 0)
 			(effects
@@ -4956,7 +5228,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "GATE"
+		(property "Value" "OUT"
 			(at 135.89 114.3 0)
 			(effects
 				(font
@@ -4996,11 +5268,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "fcb910a1-9dbd-7c49-2d43-3daad7b444f6")
+			(uuid "bbe98759-6bc0-94d8-5db9-7ad7ba487f09")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "TP1")
 					(unit 1)
 				)
@@ -5011,19 +5283,19 @@
 		(at 133.35 121.92)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "b4b00fc4-50a8-1040-55fd-8bc2625c5e04")
+		(uuid "997a5b78-0e4f-ef58-fa9c-d88e0e2853b1")
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 186.69 121.92 90)
+		(at 146.05 121.92 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d5aff333-cc0a-534e-eb55-d3f280e8776b")
+		(uuid "4bfcdd71-ad41-6b61-0c4d-ea917fe4d95e")
 		(property "Reference" "R3"
-			(at 186.69 118.11 90)
+			(at 146.05 118.11 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5031,15 +5303,15 @@
 			)
 		)
 		(property "Value" "220"
-			(at 186.69 125.73 90)
+			(at 146.05 125.73 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 186.69 121.92 90)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+			(at 146.05 121.92 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5048,7 +5320,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 186.69 121.92 90)
+			(at 146.05 121.92 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5057,7 +5329,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 186.69 121.92 90)
+			(at 146.05 121.92 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5066,14 +5338,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "9a4d7a1a-6a62-8f6a-1f0f-1eea7e412031")
+			(uuid "0c691b2c-de7b-4082-4ecd-71e17cb91357")
 		)
 		(pin "2"
-			(uuid "e734342c-1257-c8dc-89c3-0d6aaa60d488")
+			(uuid "5f3e1a5b-047f-7262-f83f-592294b92200")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "R3")
 					(unit 1)
 				)
@@ -5081,17 +5353,16 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_FET:Q_PMOS_GSD")
-		(at 201.93 121.92 0)
-		(mirror x)
+		(lib_id "Transistor_FET:Q_NMOS_GSD")
+		(at 165.1 121.92 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "98763d29-2161-f5e2-d53a-cc0f6d0cda73")
+		(uuid "58e40d83-787c-fe01-bdaa-325ba4af4a3f")
 		(property "Reference" "Q1"
-			(at 209.55 116.84 0)
+			(at 172.72 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5099,8 +5370,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "DMP3098L-7"
-			(at 209.55 119.38 0)
+		(property "Value" "IRF540N"
+			(at 172.72 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5108,8 +5379,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 201.93 121.92 0)
+		(property "Footprint" "Package_TO_SOT_THT:TO-220-3_Vertical"
+			(at 165.1 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5118,8 +5389,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.diodes.com/assets/Datasheets/DMP3098L.pdf"
-			(at 201.93 121.92 0)
+		(property "Datasheet" "~"
+			(at 165.1 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5129,7 +5400,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 201.93 121.92 0)
+			(at 165.1 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5139,17 +5410,17 @@
 			)
 		)
 		(pin "1"
-			(uuid "ad81d588-0b94-792f-711d-9f7bbcf9fd68")
+			(uuid "44da8837-cd95-6aa2-109c-40bd9f70c9fc")
 		)
 		(pin "2"
-			(uuid "14f52ef5-e73b-2377-1749-8cdbaeb04902")
+			(uuid "52b0aba4-5cdc-b6b4-9afd-2d49c86f8490")
 		)
 		(pin "3"
-			(uuid "9a8569c0-2590-276a-1b05-738c8ae832f2")
+			(uuid "023865a2-44ef-505e-de34-f051b6f926e2")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "Q1")
 					(unit 1)
 				)
@@ -5158,15 +5429,15 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 196.85 106.68 0)
+		(at 160.02 133.35 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2b9060e8-9d96-d300-9637-24fb4a8bf112")
+		(uuid "0204eae4-9870-fdd7-13ea-4ba336c9c31d")
 		(property "Reference" "R4"
-			(at 194.31 105.41 0)
+			(at 157.48 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5174,8 +5445,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "100k"
-			(at 194.31 107.95 0)
+		(property "Value" "10k"
+			(at 157.48 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5183,8 +5454,8 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 196.85 106.68 0)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+			(at 160.02 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5194,7 +5465,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 196.85 106.68 0)
+			(at 160.02 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5204,7 +5475,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 196.85 106.68 0)
+			(at 160.02 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5214,87 +5485,77 @@
 			)
 		)
 		(pin "1"
-			(uuid "5469b4a3-1dad-f210-642a-17cf88c4d77d")
+			(uuid "57efd8e8-fc81-a700-563e-ce635213f199")
 		)
 		(pin "2"
-			(uuid "9c6fc19a-2865-bc26-536a-5110eff9a013")
+			(uuid "5963eeec-0a78-4fd7-49a0-30a4ce8d4d06")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "R4")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(label "GATE"
-		(at 176.53 121.92 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "11c9f9fe-b07b-e3b3-639b-5c0775a52335")
-	)
 	(wire
 		(pts
-			(xy 176.53 121.92) (xy 182.88 121.92)
+			(xy 119.38 121.92) (xy 142.24 121.92)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "09a6a348-a6c8-9dc2-4a5c-bc0db8253e61")
+		(uuid "1db16090-aafc-5af5-3581-c9c707f31389")
 	)
 	(wire
 		(pts
-			(xy 190.5 121.92) (xy 196.85 121.92)
+			(xy 149.86 121.92) (xy 160.02 121.92)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "cd4a52f9-7cca-5d73-9251-6a8ccfe1d606")
+		(uuid "d7204823-254d-ea78-6729-636f39eff1c4")
 	)
 	(wire
 		(pts
-			(xy 196.85 110.49) (xy 196.85 121.92)
+			(xy 160.02 129.54) (xy 160.02 121.92)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "93e86508-99e8-10a9-7b06-60fe73acc189")
+		(uuid "fad350e1-421b-5285-a6de-0e7ad87f4a14")
 	)
 	(junction
-		(at 196.85 121.92)
+		(at 160.02 121.92)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "d69886d2-61d5-37f1-631e-5e6a52dafe1b")
+		(uuid "87501375-a4e8-7d82-773f-1d1045286c66")
 	)
 	(wire
 		(pts
-			(xy 196.85 102.87) (xy 196.85 99.06)
+			(xy 160.02 137.16) (xy 160.02 143.51)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "7498ecc0-13ce-0de7-7cd6-3c1cfd5e21c0")
+		(uuid "600cd9c1-b0e8-4c88-d498-f2c7d60aaa0e")
 	)
 	(symbol
-		(lib_id "power:+9V")
-		(at 196.85 99.06 0)
+		(lib_id "power:GND")
+		(at 160.02 143.51 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "48158e76-e1eb-61f8-d48b-06f08347190e")
+		(uuid "6f1cae34-3d7b-8cde-263a-306a43bee74c")
 		(property "Reference" "#PWR15"
-			(at 196.85 99.06 0)
+			(at 160.02 143.51 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5302,8 +5563,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+9V"
-			(at 196.85 92.71 0)
+		(property "Value" "GND"
+			(at 160.02 149.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5311,11 +5572,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "44a486eb-3f6a-72ff-cc49-1b76d4da6820")
+			(uuid "d8d7cbfd-4a4f-0223-175e-d92762e70549")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR15")
 					(unit 1)
 				)
@@ -5324,25 +5585,25 @@
 	)
 	(wire
 		(pts
-			(xy 204.47 116.84) (xy 204.47 109.22)
+			(xy 167.64 127) (xy 167.64 133.35)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "06cbe2b5-8e61-b069-ce5b-1fb51a3d7417")
+		(uuid "a030a7f4-8bd7-6349-d402-731f6d5e32cb")
 	)
 	(symbol
-		(lib_id "power:+9V")
-		(at 204.47 109.22 0)
+		(lib_id "power:GND")
+		(at 167.64 133.35 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "35960470-cf92-51c4-b122-9fc8d3639153")
+		(uuid "90ec0425-3412-60aa-5929-84b601314d98")
 		(property "Reference" "#PWR16"
-			(at 204.47 109.22 0)
+			(at 167.64 133.35 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5350,8 +5611,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+9V"
-			(at 204.47 102.87 0)
+		(property "Value" "GND"
+			(at 167.64 139.7 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5359,11 +5620,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "3f6ce9af-1357-543d-16d2-089c8ab89d47")
+			(uuid "604a1957-e2a6-f271-0fef-b8a1faf0d520")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR16")
 					(unit 1)
 				)
@@ -5372,55 +5633,55 @@
 	)
 	(wire
 		(pts
-			(xy 204.47 127) (xy 204.47 135.89)
+			(xy 167.64 116.84) (xy 167.64 109.22)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "1ea635de-4061-0ac6-c0eb-1a0b8583f9c8")
+		(uuid "11dd4612-921d-67b7-12dd-1adcf71890f8")
 	)
 	(wire
 		(pts
-			(xy 204.47 135.89) (xy 219.71 135.89)
+			(xy 167.64 109.22) (xy 180.34 109.22)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "1091385d-223f-9233-6eac-431a400d6d9d")
+		(uuid "82d36bfa-1424-dca4-4d66-37b3ff2f4756")
 	)
-	(label "SW_LED"
-		(at 219.71 135.89 0)
+	(label "LED_RTN"
+		(at 180.34 109.22 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left bottom)
 		)
-		(uuid "255b6d99-d033-baa6-729a-c40b3fc62f4b")
+		(uuid "14734e79-5f52-c4f4-d0fc-322693ddc63d")
 	)
 	(wire
 		(pts
-			(xy 212.09 135.89) (xy 212.09 143.51)
+			(xy 173.99 109.22) (xy 173.99 101.6)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "96848282-37e2-8714-99bf-d0986f617bad")
+		(uuid "334605f9-bcb0-306a-f83d-979b7a8a0fe4")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 212.09 143.51 0)
+		(at 173.99 101.6 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2e2f500c-a3f4-7361-ab72-7edb940639f5")
+		(uuid "d9390ade-9fcc-5b6a-e13f-7ddeb66c54f6")
 		(property "Reference" "TP2"
-			(at 214.63 140.97 0)
+			(at 176.53 99.06 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5428,8 +5689,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SW_LED"
-			(at 214.63 143.51 0)
+		(property "Value" "LED_RTN"
+			(at 176.53 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5438,7 +5699,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 212.09 143.51 0)
+			(at 173.99 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5448,7 +5709,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 212.09 143.51 0)
+			(at 173.99 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5458,7 +5719,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 212.09 143.51 0)
+			(at 173.99 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5468,11 +5729,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "08ef0ed1-b6f3-b0de-915d-9791359f8be7")
+			(uuid "cd721017-a723-cc24-1def-c7def48f99a2")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "TP2")
 					(unit 1)
 				)
@@ -5480,22 +5741,22 @@
 		)
 	)
 	(junction
-		(at 212.09 135.89)
+		(at 173.99 109.22)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "2c6b193b-6331-5f12-701d-d679efc1e96b")
+		(uuid "79e6c6ee-3957-f7fb-e827-0e946b615ef7")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 243.84 140.97 0)
+		(at 191.77 101.6 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "feb398ce-11a4-a6d0-dee0-5ed643258008")
+		(uuid "030edde6-66e4-e417-7eb2-2953f2eea75d")
 		(property "Reference" "TP3"
-			(at 246.38 138.43 0)
+			(at 194.31 99.06 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5504,7 +5765,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 246.38 140.97 0)
+			(at 194.31 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5513,7 +5774,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 243.84 140.97 0)
+			(at 191.77 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5523,7 +5784,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 243.84 140.97 0)
+			(at 191.77 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5533,7 +5794,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 243.84 140.97 0)
+			(at 191.77 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5543,11 +5804,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "0d7b1e48-492e-0681-362c-38d97fc5fba7")
+			(uuid "fb9e448d-2df2-e68c-5d8f-1484edea6ac0")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "TP3")
 					(unit 1)
 				)
@@ -5556,25 +5817,25 @@
 	)
 	(wire
 		(pts
-			(xy 243.84 140.97) (xy 243.84 147.32)
+			(xy 191.77 101.6) (xy 191.77 109.22)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "d4ac7e43-80df-9a89-7bb2-8dcb7faf8c30")
+		(uuid "cad02bbf-4bdd-132f-08b6-4d72573e1bd4")
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 243.84 147.32 0)
+		(at 191.77 109.22 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "11a6b9ed-2f0e-8932-5602-494a2a8328da")
+		(uuid "f96bbbc1-1fb6-62ed-1bca-6f45d788102d")
 		(property "Reference" "#PWR17"
-			(at 243.84 147.32 0)
+			(at 191.77 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5583,7 +5844,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 243.84 153.67 0)
+			(at 191.77 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5591,11 +5852,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "87d5bb02-7774-947f-ee5b-d0d3ca222154")
+			(uuid "eb9e2170-9953-6d29-8b80-e57a5d217e19")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR17")
 					(unit 1)
 				)
@@ -5610,7 +5871,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "73966d0c-515c-cab0-826f-5f91bd15cef0")
+		(uuid "5d4fda19-5d47-a0b8-c5d3-a4d3c6c233a5")
 		(property "Reference" "J2"
 			(at 309.88 97.79 0)
 			(effects
@@ -5660,71 +5921,41 @@
 			)
 		)
 		(pin "1"
-			(uuid "d68b0bc3-4d2c-bf8a-bbfd-e5cd57fa7855")
+			(uuid "a29a2fff-b1f5-e372-8702-56599644f510")
 		)
 		(pin "2"
-			(uuid "7aeba2e1-380a-aafa-9ab5-f25efbcaa2fb")
+			(uuid "009b1e5e-bee3-17e1-67a7-8e1b7955f5ef")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "J2")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(label "SW_LED"
-		(at 283.21 100.33 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "1669f49d-b548-a073-f099-1a568ca8a626")
-	)
 	(wire
 		(pts
-			(xy 283.21 100.33) (xy 297.18 100.33)
+			(xy 297.18 100.33) (xy 290.83 100.33)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "23a81b79-c845-7493-1626-833656175929")
-	)
-	(wire
-		(pts
-			(xy 297.18 102.87) (xy 283.21 102.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3e725c5b-069d-2962-8889-cc735c411560")
-	)
-	(wire
-		(pts
-			(xy 283.21 102.87) (xy 283.21 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0e778825-2e3d-dd5c-6919-d780fa47dadd")
+		(uuid "38d93780-bbd9-e781-3c5a-3297663d68ec")
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 283.21 107.95 0)
+		(lib_id "power:+9V")
+		(at 290.83 100.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0e7245b1-7763-c1ae-dbc0-39778d7e4bbd")
+		(uuid "a2a3b163-4ec8-21e0-b692-fe9e96f02cbf")
 		(property "Reference" "#PWR18"
-			(at 283.21 107.95 0)
+			(at 290.83 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5732,8 +5963,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "GND"
-			(at 283.21 114.3 0)
+		(property "Value" "+9V"
+			(at 290.83 93.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5741,16 +5972,36 @@
 			)
 		)
 		(pin "1"
-			(uuid "008ea5fe-3564-4775-aef9-526ef0370b4f")
+			(uuid "1a244981-3b47-0b5c-00a9-0cd0c5dcad58")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR18")
 					(unit 1)
 				)
 			)
 		)
+	)
+	(wire
+		(pts
+			(xy 297.18 102.87) (xy 287.02 102.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3df3e8fa-e565-e25c-b563-8124af39758e")
+	)
+	(label "LED_RTN"
+		(at 287.02 102.87 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "4c99ddd3-883f-30a6-78a6-310630fa3aa9")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -5760,7 +6011,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5fbaaa14-90b0-e671-4f04-af64cec6f7ff")
+		(uuid "7fcabcff-775a-093e-1afd-e3bcffc08124")
 		(property "Reference" "J3"
 			(at 309.88 115.57 0)
 			(effects
@@ -5810,71 +6061,41 @@
 			)
 		)
 		(pin "1"
-			(uuid "300a5d23-208c-f4a9-e2a1-fa1693a1d796")
+			(uuid "e9d244b7-3e58-ef27-e762-e1cc420fe6e5")
 		)
 		(pin "2"
-			(uuid "4e3a06f0-8bfb-5c55-e698-822fb8bf65b2")
+			(uuid "6c113f44-f0db-0a91-ed3a-5bd6ce35e014")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "J3")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(label "SW_LED"
-		(at 283.21 118.11 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "20a5ec32-69d4-2371-0e96-ca8c43f6c2cf")
-	)
 	(wire
 		(pts
-			(xy 283.21 118.11) (xy 297.18 118.11)
+			(xy 297.18 118.11) (xy 290.83 118.11)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "8c6bcfc2-6770-50c7-6c02-79e94189dcd1")
-	)
-	(wire
-		(pts
-			(xy 297.18 120.65) (xy 283.21 120.65)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "54cdb81a-6fb4-012a-568f-15437a61e1c3")
-	)
-	(wire
-		(pts
-			(xy 283.21 120.65) (xy 283.21 125.73)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b7e80a59-403a-188b-caee-6106ad0a1101")
+		(uuid "38e0737e-4fd0-aa0a-3820-919a6332b01a")
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 283.21 125.73 0)
+		(lib_id "power:+9V")
+		(at 290.83 118.11 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "20cbc3bd-385f-9aae-b430-df9c795a8bbd")
+		(uuid "32d5b937-4be4-1813-6aed-3857dc4f4197")
 		(property "Reference" "#PWR19"
-			(at 283.21 125.73 0)
+			(at 290.83 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5882,8 +6103,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "GND"
-			(at 283.21 132.08 0)
+		(property "Value" "+9V"
+			(at 290.83 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5891,16 +6112,36 @@
 			)
 		)
 		(pin "1"
-			(uuid "0138bec5-a061-eca2-e315-57bcbbfc665b")
+			(uuid "8b6a376d-a212-087f-60ab-9e30058f3af6")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR19")
 					(unit 1)
 				)
 			)
 		)
+	)
+	(wire
+		(pts
+			(xy 297.18 120.65) (xy 287.02 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4a8be8d3-4128-c5a5-2128-3897b362b57d")
+	)
+	(label "LED_RTN"
+		(at 287.02 120.65 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "0af7f9d9-6d5d-0604-bde0-4717502515b1")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -5910,7 +6151,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "693c3442-bbcf-5fed-b8b2-30bc40b01369")
+		(uuid "f1b2a0fa-f08e-a4c3-bde7-3f0cb85ed46c")
 		(property "Reference" "J4"
 			(at 309.88 133.35 0)
 			(effects
@@ -5960,71 +6201,41 @@
 			)
 		)
 		(pin "1"
-			(uuid "ad8e7ae7-53ec-6f9e-c8ea-1750e4a8b1b3")
+			(uuid "a8787ddf-89c9-3492-966e-9f8296d7c977")
 		)
 		(pin "2"
-			(uuid "8c863851-19dd-d7f3-b16f-8c13f6a72fcd")
+			(uuid "2907faf1-df26-bdae-c3a2-c02b629086e8")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "J4")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(label "SW_LED"
-		(at 283.21 135.89 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "dc64baf8-f304-d27e-4c18-fec3ea22cf1a")
-	)
 	(wire
 		(pts
-			(xy 283.21 135.89) (xy 297.18 135.89)
+			(xy 297.18 135.89) (xy 290.83 135.89)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5378e71e-43c4-1919-3cba-3b9928eb5f9a")
-	)
-	(wire
-		(pts
-			(xy 297.18 138.43) (xy 283.21 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c8828d58-d981-4a00-481d-eddc76fe8acc")
-	)
-	(wire
-		(pts
-			(xy 283.21 138.43) (xy 283.21 143.51)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3913c513-3934-7276-874a-ae66a6dc4d6f")
+		(uuid "1d91e4f5-bdee-473f-e199-4dcd6e6a3fa6")
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 283.21 143.51 0)
+		(lib_id "power:+9V")
+		(at 290.83 135.89 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8f870fbd-d37e-528f-d640-38ce7854fb1f")
+		(uuid "0e6ad94c-8c12-958b-542e-9d2088e996b3")
 		(property "Reference" "#PWR20"
-			(at 283.21 143.51 0)
+			(at 290.83 135.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6032,8 +6243,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "GND"
-			(at 283.21 149.86 0)
+		(property "Value" "+9V"
+			(at 290.83 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6041,16 +6252,36 @@
 			)
 		)
 		(pin "1"
-			(uuid "2b8949a4-239c-66ab-14b2-bc213fc41093")
+			(uuid "45a3f4da-f9c9-ba62-3c3d-23899a76eebe")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR20")
 					(unit 1)
 				)
 			)
 		)
+	)
+	(wire
+		(pts
+			(xy 297.18 138.43) (xy 287.02 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc1333dd-e8d0-0e35-70a0-d526ed8c4416")
+	)
+	(label "LED_RTN"
+		(at 287.02 138.43 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "be626028-b733-cfc2-2ac2-de8f5e81d6af")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -6060,7 +6291,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0e0705be-15a5-4cd5-9e82-7e73cf80ce37")
+		(uuid "0ed3abf0-3130-ebc0-13a6-dca17fefbff4")
 		(property "Reference" "J5"
 			(at 309.88 151.13 0)
 			(effects
@@ -6110,71 +6341,41 @@
 			)
 		)
 		(pin "1"
-			(uuid "2bdbb032-451b-15a1-14d7-6c0b8600ae7c")
+			(uuid "5a21734c-acdc-d731-cb0c-8ec239708568")
 		)
 		(pin "2"
-			(uuid "677ed21b-bd89-43fa-4465-aaef4a1a614d")
+			(uuid "cb09ab96-457e-7eec-2241-94787bca808f")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "J5")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(label "SW_LED"
-		(at 283.21 153.67 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "89b15e8b-e0d8-23b7-017a-9ea036d9a741")
-	)
 	(wire
 		(pts
-			(xy 283.21 153.67) (xy 297.18 153.67)
+			(xy 297.18 153.67) (xy 290.83 153.67)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "6967f51e-0879-c244-dbfb-b7275d9329ae")
-	)
-	(wire
-		(pts
-			(xy 297.18 156.21) (xy 283.21 156.21)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3d1ceab5-4766-21fc-52ec-a8b5b00284c4")
-	)
-	(wire
-		(pts
-			(xy 283.21 156.21) (xy 283.21 161.29)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0dfa1514-0b06-65e0-b567-4475faf8c85d")
+		(uuid "485a26be-8c6d-b128-ba43-346b215339e8")
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 283.21 161.29 0)
+		(lib_id "power:+9V")
+		(at 290.83 153.67 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0ea01468-d479-6530-d6c5-10df596b3d8b")
+		(uuid "2b306635-3a29-5aa8-f387-9cfbb2ed1927")
 		(property "Reference" "#PWR21"
-			(at 283.21 161.29 0)
+			(at 290.83 153.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6182,8 +6383,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "GND"
-			(at 283.21 167.64 0)
+		(property "Value" "+9V"
+			(at 290.83 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6191,50 +6392,36 @@
 			)
 		)
 		(pin "1"
-			(uuid "14cb7695-2b34-6dd1-850c-61b5ea53b1b4")
+			(uuid "0f404a8e-50ee-5312-2707-289784a6bd00")
 		)
 		(instances
-			(project "WandStrobeDriver"
-				(path "/07f93fa4-9006-6616-3a8e-9e62404ba91e"
+			(project "WandStrobeBreadboard"
+				(path "/3f7365a1-4da8-0edb-f907-4c8655358c88"
 					(reference "#PWR21")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(text "STROBE DRIVER rev B - one timer, nothing to adjust"
-		(exclude_from_sim no)
-		(at 30.48 168 0)
-		(effects
-			(font
-				(size 2 2)
-				(bold yes)
-			)
-			(justify left top)
+	(wire
+		(pts
+			(xy 297.18 156.21) (xy 287.02 156.21)
 		)
-		(uuid "a547a653-b466-1ba3-9005-3f9263d35bc5")
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4efbba7a-c447-7cec-0eba-1d6a69e21047")
 	)
-	(text "Regime B (long camera exposure, short flash). The flash - not the shutter -\ndefines the instant, so every camera whose shutter is open records the same\n~1 ms. One timer for the whole wand, so \"dark\" always means occluded and\nnever out of phase.\n\nNO DIODE ACROSS R2, AND NONE IS NEEDED. The usual trick for sub-50% duty\nassumes the LEDs are on when OUT is HIGH. They are not: Q1 is P-channel on\nthe high side and conducts when OUT is LOW, so the SHORT state is already\nthe one we want. A plain astable with R1 >> R2 gives 0.36% duty directly.\nAdding the diode would force R1 small, and R1 then sinks Vcc/R1 through\nDISCH for the whole 327 ms off-time - about 20 mA on a battery. As built,\nthat current is 9 uA.\n\nHigh side also means every marker's return is permanently grounded, so a\nchafed wire against the frame is a non-event rather than a short.\n\nTIMING   t_on  = 0.693 * R2 * C6            1173 us\n         t_off = 0.693 * (R1+R2) * C6       327 ms      -> 3.05 Hz\n         1 M is legal ONLY because the TLC555 is CMOS (pA input current).\n         A bipolar NE555 would not hold this operating point.\n\nR2 SETS PULSE WIDTH, WHICH IS THE BRIGHTNESS CONTROL. Peak current is fixed\nby the ballast resistor on each marker board, so the light delivered into\none exposure is I x t_on. Fit R2 THT and clip a 5k pot across its pads for\nbring-up, then solder the nearest E24 value. Rate barely moves with R2:\n         1k8  -> 586 us      3k3 -> 1075 us   (fitted, E12)\n         2k2  -> 717 us      3k9 -> 1270 us\n         2k7  -> 879 us      4k7 -> 1531 us\n         Every resistor on this board is an E12 value. The exact number does\n         not matter - the 470n film cap is +/-5% on its own, which is +/-54 us,\n         and R2 is set empirically against a camera reading anyway.\n\nSUPPLY   9 V. 6xAA alkaline, or a PP3 for bench work. The 12 V of rev A was\n         only ever needed by the constant-current sinks, which are gone.\n         Total average draw ~2.2 mA, dominated by the TLC555, not the LEDs.\n\nR10/C3/C4 keep the 555 off the LED rail so the switching edge cannot\nmodulate its Vcc-referenced thresholds. Two parts against a fault that is\nvery hard to diagnose later - worth keeping even in a minimal build."
-		(exclude_from_sim no)
-		(at 30.48 174 0)
+	(label "LED_RTN"
+		(at 287.02 156.21 0)
 		(effects
 			(font
-				(size 1.4 1.4)
+				(size 1.27 1.27)
 			)
-			(justify left top)
+			(justify left bottom)
 		)
-		(uuid "7ac445d8-3844-5332-248e-8e12c5357071")
-	)
-	(text "Q1 sees Vgs = -9 V, so a +/-12 V part (AO3401A) is now legal too.\nDMP3098L-7 is +/-20 V and costs the same. Do not fit a +/-8 V part."
-		(exclude_from_sim no)
-		(at 176.53 158 0)
-		(effects
-			(font
-				(size 1.4 1.4)
-			)
-			(justify left top)
-		)
-		(uuid "d2c87fcf-aba0-10cf-566d-78634072be70")
+		(uuid "93a6b06c-f5c3-3ff5-e662-1f087e1f884a")
 	)
 	(sheet_instances
 		(path "/"

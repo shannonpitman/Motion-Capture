@@ -44,6 +44,10 @@ FP = {  # footprints; passives 0805, transistors SOT-23, timer socketed DIP-8
     "tp":    "TestPoint:TestPoint_Pad_D1.5mm",
     "fuse":  "Fuse:Fuse_Bourns_MF-RG300",
     "Rt":    "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+    "Cdisc": "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm",
+    "DO41":  "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal",
+    "DO35":  "Diode_THT:D_DO-35_SOD27_P10.16mm_Horizontal",
+    "TO220": "Package_TO_SOT_THT:TO-220-3_Vertical",
 }
 
 
@@ -360,6 +364,182 @@ def marker(outdir):
     _write(s, outdir, "WandMarker")
 
 
+# ===========================================================================
+#  Board 3 - breadboard variant, N-channel low side
+# ===========================================================================
+def breadboard(outdir):
+    """The bench build for a lab that only has N-channel parts.
+
+    An N-channel has to switch the LOW side and conducts on gate-HIGH, so the
+    flash becomes the OUT-high state - the opposite of the PCB - and the diode
+    across R2 that the PCB does without is now required. R1 and R2 swap values.
+    Everything optical and every timing number is unchanged.
+    """
+    s = Sch("WandStrobeBreadboard",
+            "Wand strobe driver - BREADBOARD variant, N-channel low side, 9 V",
+            rev="B-bb", company="UCT MSc - Shannon Pitman", paper="A3")
+
+    LEFT = dict(ref_off=(-2.54, -1.27), val_off=(-2.54, 1.27), just="right")
+    TPT = dict(ref_off=(2.54, -2.54), val_off=(2.54, 0), just="left")
+    RAIL = 38.1
+
+    # ---- input chain -------------------------------------------------------
+    j1 = s.sym("Connector_Generic:Conn_01x02", "J1", "9V IN", (30.48, RAIL),
+               rot=180, mirror="x", footprint=FP["screw2"],
+               ref_off=(0, -10.16), val_off=(0, -7.62), just=None)
+    sw1 = s.sym("Switch:SW_SPDT", "SW1", "POWER", (48.26, RAIL), footprint=FP["sw"])
+    f1 = s.sym("Device:Polyfuse", "F1", "500mA", (63.5, RAIL), rot=90,
+               footprint=FP["fuse"])
+    d1 = s.sym("Device:D_Schottky", "D1", "1N5817", (80.01, RAIL), rot=180,
+               footprint=FP["DO41"])
+    s.wire(j1("1"), sw1("2"))
+    s.wire(sw1("1"), (59.69, 35.56), f1("1"))
+    s.no_connect(sw1("3"))
+    s.wire(f1("2"), d1("2"))
+
+    s.wire(j1("2"), (35.56, 58.42))
+    s.power("GND", (35.56, 58.42))
+    s.wire((35.56, 53.34), (22.86, 53.34))
+    s.sym("power:PWR_FLAG", "#FLG02", "PWR_FLAG", (22.86, 53.34), hide_ref=True,
+          val_off=(0, -6.35), just=None)
+    s.junction((35.56, 53.34))
+
+    # ---- +9 V rail ---------------------------------------------------------
+    s.wire(d1("1"), (212.09, RAIL))
+    c1 = s.sym("Device:C_Polarized", "C1", "1000u/16V", (106.68, 50.8),
+               footprint=FP["Cel"])
+    c2 = s.sym("Device:C", "C2", "100n", (129.54, 50.8), footprint=FP["Cdisc"])
+    r5 = s.sym("Device:R", "R5", "22k", (152.4, 50.8), footprint=FP["Rt"])
+    d2 = s.sym("Device:LED", "D2", "PWR green", (152.4, 64.77), rot=90,
+               footprint=FP["DO41"], ref_off=(11.43, -1.27),
+               val_off=(11.43, 1.27), just=None)
+    for x, top, bot in ((106.68, c1("1"), c1("2")), (129.54, c2("1"), c2("2"))):
+        s.wire((x, RAIL), top)
+        s.wire(bot, (x, 60.96))
+        s.power("GND", (x, 60.96))
+    s.wire((152.4, RAIL), r5("1"))
+    s.wire(r5("2"), d2("2"))
+    s.wire(d2("1"), (152.4, 74.93))
+    s.power("GND", (152.4, 74.93))
+
+    s.wire((175.26, RAIL), (175.26, 30.48))
+    s.sym("power:PWR_FLAG", "#FLG01", "PWR_FLAG", (175.26, 30.48), hide_ref=True,
+          val_off=(0, -3.81), just=None)
+    s.wire((190.5, RAIL), (190.5, 30.48))
+    s.power("+9V", (190.5, 30.48))
+    s.junction((106.68, RAIL), (129.54, RAIL), (152.4, RAIL),
+               (175.26, RAIL), (190.5, RAIL))
+
+    # ---- filtered timer rail ----------------------------------------------
+    r10 = s.sym("Device:R", "R10", "100", (215.9, RAIL), rot=90, footprint=FP["Rt"])
+    s.wire(r10("2"), (295.28, RAIL))
+    c3 = s.sym("Device:C_Polarized", "C3", "10u", (241.3, 50.8), footprint=FP["Cel_s"])
+    c4 = s.sym("Device:C", "C4", "100n", (264.16, 50.8), footprint=FP["Cdisc"])
+    for x, top, bot in ((241.3, c3("1"), c3("2")), (264.16, c4("1"), c4("2"))):
+        s.wire((x, RAIL), top)
+        s.wire(bot, (x, 60.96))
+        s.power("GND", (x, 60.96))
+    s.wire((275.59, RAIL), (275.59, 30.48))
+    s.sym("power:PWR_FLAG", "#FLG03", "PWR_FLAG", (275.59, 30.48), hide_ref=True,
+          val_off=(0, -3.81), just=None)
+    s.wire((295.28, RAIL), (295.28, 30.48))
+    s.power("VCC", (295.28, 30.48))
+    s.junction((241.3, RAIL), (264.16, RAIL), (275.59, RAIL))
+
+    # ---- timing: R1 and R2 SWAPPED vs the PCB, plus the diode -------------
+    XT = 60.96
+    r1 = s.sym("Device:R", "R1", "3k3", (XT, 95.25), footprint=FP["Rt"], **LEFT)
+    r2 = s.sym("Device:R", "R2", "1M", (XT, 113.03), footprint=FP["Rt"],
+               ref_off=(2.54, -1.27), val_off=(2.54, 1.27), just="left")
+    dt = s.sym("Device:D", "D3", "1N4148", (48.26, 113.03), rot=90,
+               footprint=FP["DO35"], ref_off=(-13.97, -1.27),
+               val_off=(-13.97, 1.27), just=None)
+    c6 = s.sym("Device:C", "C6", "470n film", (XT, 129.54), footprint=FP["Cfilm"],
+               **LEFT)
+
+    s.wire(r1("1"), (XT, 85.09))
+    s.power("VCC", (XT, 85.09))
+    s.wire(r1("2"), r2("1"))
+    s.wire(r2("2"), c6("1"))
+    s.wire(c6("2"), (XT, 140.97))
+    s.power("GND", (XT, 140.97))
+    # diode in parallel with R2: anode on the DISCH node, cathode on THRES
+    s.wire(dt("2"), (48.26, 109.22), r2("1"))
+    s.wire(dt("1"), (48.26, 116.84), r2("2"))
+    s.junction(r2("1"), r2("2"))
+
+    # ---- TLC555 ------------------------------------------------------------
+    u1 = s.sym("Timer:TLC555xP", "U1", "TLC555CP", (109.22, 121.92),
+               footprint=FP["DIP8"],
+               datasheet="https://www.ti.com/lit/ds/symlink/tlc555.pdf",
+               ref_off=(12.7, -8.89), val_off=(12.7, -6.35), just="left")
+
+    s.wire((XT, 104.14), (82.55, 104.14), (82.55, 119.38), u1("7"))
+    s.junction((XT, 104.14))
+    s.wire((XT, 121.92), (88.9, 121.92), (88.9, 127), u1("2"))
+    s.wire((88.9, 124.46), u1("6"))
+    s.junction((XT, 121.92), (88.9, 124.46))
+    s.wire(u1("4"), (93.98, 116.84), (93.98, 105.41))
+    s.power("VCC", (93.98, 105.41))
+
+    c5 = s.sym("Device:C", "C5", "10n", (104.14, 96.52), footprint=FP["Cdisc"],
+               ref_off=(-2.54, -1.27), val_off=(-2.54, 1.27), just="right")
+    s.wire(u1("5"), (109.22, 100.33), c5("2"))
+    s.wire(c5("1"), (104.14, 85.09))
+    s.power("GND", (104.14, 85.09))
+
+    s.wire(u1("8"), (111.76, 99.06))
+    s.power("VCC", (111.76, 99.06))
+    s.wire(u1("1"), (109.22, 138.43))
+    s.power("GND", (109.22, 138.43))
+
+    # ---- gate drive + low-side N-channel -----------------------------------
+    s.wire((133.35, 121.92), (133.35, 114.3))
+    s.sym("Connector:TestPoint", "TP1", "OUT", (133.35, 114.3),
+          footprint=FP["tp"], **TPT)
+    s.junction((133.35, 121.92))
+
+    r3 = s.sym("Device:R", "R3", "220", (146.05, 121.92), rot=90, footprint=FP["Rt"])
+    q1 = s.sym("Transistor_FET:Q_NMOS_GSD", "Q1", "IRF540N", (165.1, 121.92),
+               footprint=FP["TO220"], ref_off=(7.62, -5.08),
+               val_off=(7.62, -2.54), just="left")
+    r4 = s.sym("Device:R", "R4", "10k", (160.02, 133.35), footprint=FP["Rt"],
+               **LEFT)
+    s.wire(u1("3"), r3("1"))
+    s.wire(r3("2"), q1("1"))
+    s.wire(r4("1"), q1("1"))
+    s.junction(q1("1"))
+    s.wire(r4("2"), (160.02, 143.51))
+    s.power("GND", (160.02, 143.51))
+    s.wire(q1("2"), (167.64, 133.35))
+    s.power("GND", (167.64, 133.35))
+    s.wire(q1("3"), (167.64, 109.22), (180.34, 109.22))
+    s.label("LED_RTN", (180.34, 109.22))
+    s.wire((173.99, 109.22), (173.99, 101.6))
+    s.sym("Connector:TestPoint", "TP2", "LED_RTN", (173.99, 101.6),
+          footprint=FP["tp"], **TPT)
+    s.junction((173.99, 109.22))
+    s.sym("Connector:TestPoint", "TP3", "GND", (191.77, 101.6),
+          footprint=FP["tp"], **TPT)
+    s.wire((191.77, 101.6), (191.77, 109.22))
+    s.power("GND", (191.77, 109.22))
+
+    # ---- marker outputs ----------------------------------------------------
+    for ref, tag, y in [("J2", "MARKER A (origin)", 100.33),
+                        ("J3", "MARKER B", 118.11),
+                        ("J4", "MARKER C (+X)", 135.89),
+                        ("J5", "MARKER D (+Y)", 153.67)]:
+        j = s.sym("Connector_Generic:Conn_01x02", ref, tag, (302.26, y),
+                  footprint=FP["conn2"], ref_off=(7.62, -2.54),
+                  val_off=(7.62, 0), just="left")
+        s.wire(j("1"), (290.83, y))
+        s.power("+9V", (290.83, y))
+        s.wire(j("2"), (287.02, y + 2.54))
+        s.label("LED_RTN", (287.02, y + 2.54))
+
+    _write(s, outdir, "WandStrobeBreadboard")
+
+
 def _write(s, outdir, name):
     d = os.path.join(outdir, name)
     os.makedirs(d, exist_ok=True)
@@ -381,3 +561,4 @@ if __name__ == "__main__":
     out = HERE
     driver(out)
     marker(out)
+    breadboard(out)
