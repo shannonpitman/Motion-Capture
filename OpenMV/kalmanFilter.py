@@ -821,6 +821,30 @@ def try_acquire(img, buf, t_us):
 
     _acq_prev = None
     init_id = (init_id + 1) & 0xFF       # tells the base IDs were reassigned
+    # WHAT THE BASE MUST DO WITH THIS, from a simulation result. The ids above
+    # are BLOB ORDER and carry no claim - scan_full returns blobs in whatever
+    # order it found them. That is correct and matches "send raw centroids
+    # only", but it puts a hard requirement on the other end:
+    #
+    #   A base that re-solves correspondence by matching against its OWN
+    #   predicted marker positions CANNOT absorb this when its prediction is
+    #   wrong, and aggressive tracking then gets WORSE, not better.
+    #
+    # Measured in simulation on the most aggressive trajectory in the set:
+    # giving the cameras this autonomous acquisition while the base resolved
+    # identity by nearest-match against its own prediction took position RMS
+    # from 30.7 mm to 7.1 m. Detection was never the problem - published
+    # measurements per tick actually ROSE, from 1.14 to 3.34. Every full loss
+    # renumbered the markers, and a momentarily imperfect prediction then
+    # produced wrong labels which were fused under the wrong names. More
+    # measurements, worse answer.
+    #
+    # So the base needs correspondence that does not depend on already knowing
+    # the pose - triangulate the unlabelled blobs and match the constellation by
+    # its pairwise-distance signature, as +initpose does. Until it has that,
+    # expect a camera that re-acquires mid-flight to hurt rather than help, and
+    # treat init_id changing as a reason to re-solve identity from scratch
+    # rather than to carry the previous assignment forward.
     print("Acquired %d markers after %d frames (init_id=%d):"
           % (len(new), _acq_frames, init_id))
     for t in new:
@@ -849,9 +873,33 @@ def try_acquire(img, buf, t_us):
 #   f  u, f v     RAW refined centroid, SENSOR px
 #   f  sigma      measurement 1-sigma, SENSOR px  (R = sigma^2)
 #   B  flags      bit0 refined, bit1 saturated, bit2 clipped, bit3 VALID
+#                 bit4 RESERVED - LABELS_VALID, see below. Do not reuse.
 #
 # Only bit3 decides whether to fuse. bit1/bit2 mean degraded but usable -
 # sigma has already been inflated to match.
+#
+# BIT4 IS RESERVED ON A SIMULATION RESULT, and is deliberately NOT emitted,
+# because this camera cannot honestly compute it yet. Written down so the bit is
+# not spent on something else.
+#
+# init_id says "IDs were reassigned AT THIS MOMENT". What it cannot say is that
+# identity has silently DRIFTED since - that the marker this camera still calls
+# 3 is no longer the one the base calls 3, with no re-acquisition in between.
+# The simulation added a per-frame test for exactly that: each live track is
+# checked against the base's reprojected hint, and the camera declares its set
+# unlabelled when they disagree. It caught cases a reassignment counter cannot.
+#
+# It needs the BASE->CAMERA hint, which this firmware does not have - grep for
+# `hint` or `recv` and there is nothing. With no downlink there is no reference
+# to drift against, and identity here is only ever reassigned wholesale in
+# try_acquire, which init_id already covers exactly. So the correct firmware
+# change today is to reserve the bit, not to fake it.
+#
+# WHEN THE DOWNLINK EXISTS, emit bit4 per marker: set when the track sits within
+# the seeding radius of the hint for the marker it claims to be, clear
+# otherwise. Per-frame and stateless - a latched flag goes stale once the base
+# recovers, and stays unset if labels drift without a re-acquisition, which is
+# the failure this is meant to catch.
 
 PKT_MAGIC = 0x4B
 PACKET_FMT = '<BBBBHI' + 'fffB' * N_MARKERS
