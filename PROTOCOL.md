@@ -366,6 +366,103 @@ On a 94 deg lens the frame corners vignette noticeably, and those are exactly
 the placements that matter most. Check boards near the frame edge still reach
 ~150 max.
 
+### ROLLING SHUTTER IS THE DOMINANT ERROR SOURCE - BRACE THE BOARD
+
+The OV5640 is a rolling-shutter sensor and a **full-res readout takes 74 ms**.
+A board spanning 1000 of the 1944 rows is therefore scanned over ~38 ms, so any
+motion during readout SHEARS the board. This is not blur - it is a geometric
+distortion of the target itself.
+
+Measured on the first cam2 run (40 frames, hand-held, A3 board / 40 mm squares):
+
+  linear shear term vs per-image reprojection error   r = +0.84
+
+  best 5 images : shear 0.03-0.19 px -> error 0.37-0.44 px
+  worst 5 images: shear 0.29-3.68 px -> error 0.90-1.93 px
+  board spanned 492-1278 rows = 18.7-48.7 ms of readout
+
+Everything else was ruled out first, and none of it explains the error:
+
+  board flatness  mean residual per board point equals its own s.e.m.
+                  (ratio 1.0x) - no systematic view-independent pattern
+  brightness      r = +0.19
+  sharpness       r = -0.13
+  reach           r = -0.07
+
+**Budget.** To hold shear under 0.5 sensor px across a ~38 ms readout the board
+must move slower than about 13 sensor px/s. That is roughly ten times steadier
+than a hand can manage. **The board must be braced** - a stand, a clamp, or
+leant against something - and moved between shots, not held.
+
+Note the two budgets are different and the tighter one wins:
+  BLUR  - smear within one exposure (8-40 ms), softens corners
+  SHEAR - motion across the 74 ms readout, deforms the target (~10x tighter)
+
+### Capture must be verified at full resolution
+
+The preview is a 4x downscale, and downscaled detection is more forgiving than
+the real thing - a frame can pass the live gate and still fail at full res.
+Combined with ~0.3 s of trigger latency, 9 of 40 frames in run 1 were lost,
+5 of them because the board drifted off the frame edge between the approved
+preview and the actual capture.
+
+So: (a) require a margin from the frame edge of at least 4% of the frame, and
+at least twice the allowed drift; (b) after saving, re-run detection on the
+saved full-res file and DELETE it if it fails, prompting a redo. The set is
+then good by construction rather than by inspection.
+
+### cam2, measured 2026-09-10 (run 1, hand-held - PROVISIONAL)
+
+  31/40 detected, RMS 0.756 px (0.466 on the best 16). Target is 0.25.
+  fx, fy   2323.3 +/- 1.2 , 2323.7 +/- 1.4   (ratio 0.9998 - square pixels)
+  cx, cy   1162.8 +/- 2.1 , 875.2 +/- 2.0    (frame centre 1296, 972)
+  k1 -0.464   k2 +0.272   k3 -0.100   p1 +0.0011   p2 +0.0016   (all significant)
+
+Stable but not final: across 12 random half-splits fx varied +/-6 and cx +/-10,
+and pruning 31 -> 16 images moved fx by 0.2% while nearly halving RMS. So the
+parameters are well determined; the residual is inflated by sheared frames.
+
+**Field of view: quote the distorted figure, not the pinhole one.**
+  pinhole 2*atan(W/2fx)      H 58.3 deg, V 45.4 deg     <- MISLEADING
+  real rays (undistorted)    H 67.3 deg, V 49.3 deg, diagonal 77.2 deg
+  lens datasheet             H 70.8 deg, V 55.6 deg
+The paraxial focal length (3.25 mm at 1.4 um pitch) is LARGER than the "2.8 mm"
+on the label because the lens has <-24% TV distortion; the datasheet's own
+figures are only self-consistent that way. We also see slightly less field than
+the datasheet because the OV5640 is 1/4" (3.63 mm wide) and under-fills a lens
+rated for 1/3".
+
+**The principal point is genuinely off-centre by 133 x 97 px = 231 um.** That is
+the scale of a re-seated sensor, and this camera had its sensor removed to fit
+the visible-light filter. The small but significant tangential terms are the
+matching signature of slight sensor tilt. Do not assume the principal point is
+at the frame centre - it is 5% of the frame width away.
+
+**Refocusing moves cx, cy more than it moves fx.** Screwing the lens from a 1 m
+to a 1.9 m focus changes fx by only ~0.15% (~3.5 px) - small, but still 3x the
+fit's standard error. The larger risk is that M12 threads have play, so turning
+the lens decentres and tilts it, which shifts the principal point. This is the
+mechanical reason for the lock-focus-before-intrinsics rule in Section 1.
+Fitting a filter behind the lens also pushes focus back by about t/3 for
+thickness t, so the lens must be re-set afterwards - expected, not a fault.
+
+**Depth of field, corrected.** With f = 3.25 mm at f/2.0, hyperfocal is ~1.9 m.
+Focused at 1 m the lens is sharp from roughly 0.65 to 2.1 m - which puts arena
+markers at 5-8 m OUTSIDE it. Set focus to ~1.9 m and shoot the board at
+1.2-2.0 m; one setting then serves both calibration and the range test.
+
+**Coverage was the weakest part of run 1**: only 0.6% of corners reached beyond
+80% of the radial field, max 89%. Tilt was good - median 40 deg, only 4 of 31
+frames under 15 deg.
+
+**Vignetting is still unmeasured.** Stacking the 40 frames as a pseudo
+flat-field gave a 76% -> 11% falloff, but that cannot separate lens vignetting
+from the fact that one torch lit only part of the room - the apparent
+illumination centre landed at (1118, 589), nowhere near the principal point,
+which shows the stack is dominated by scene lighting. **Test it properly:** fill
+the frame with a blank, evenly lit wall and measure the radial profile. The
+datasheet claims >70% relative illumination.
+
 ### Sequencing
 
 Intrinsics depend on **focus**; extrinsics depend on **camera pose**. Intrinsics

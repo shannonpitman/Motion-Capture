@@ -15,3 +15,11 @@ _autosave-*
 
 # VS Code Local History
 .history/
+
+# Calibration frames - large, regenerable, not source (5 MB each)
+intrinsics/images/**/*.pgm
+intrinsics/images/**/*.png
+intrinsics/images/**/*.bmp
+
+# MATLAB autosaves
+*.asv

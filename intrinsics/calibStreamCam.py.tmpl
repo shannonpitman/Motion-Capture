@@ -1,0 +1,54 @@
+import csi, binascii, time, sys, select
+TARGET = 215
+AE = %(ae)d
+c = csi.CSI(); c.reset(); c.pixformat(csi.GRAYSCALE)
+c.framesize(csi.WQXGA2); c.snapshot(time=2000)
+c.auto_gain(False, gain_db=%(gain)d)
+e = %(exp)d
+c.auto_exposure(False, exposure_us=e)
+poll = select.poll(); poll.register(sys.stdin, select.POLLIN)
+while True:
+    img = c.snapshot()
+    s = img.copy(x_scale=0.25, y_scale=0.25)
+    W = s.width(); H = s.height(); b = s.bytearray()
+    mx = 0; y = 2
+    while y < H-2:
+        row = y*W; x = 2
+        while x < W-2:
+            p = b[row+x]
+            if p > mx: mx = p
+            x += 3
+        y += 3
+    if AE and (mx < 170 or mx > 242) and mx > 0:
+        n = e * TARGET / mx
+        n = e + (n - e) * 0.6
+        if n < 200: n = 200
+        if n > 70000: n = 70000
+        if abs(n - e) / e > 0.05:
+            e = int(n); c.auto_exposure(False, exposure_us=e)
+    fire = False
+    while poll.poll(0):
+        ch = sys.stdin.read(1)
+        if ch == "S": fire = True
+    if fire:
+        n3 = img.width()*img.height(); fb = img.bytearray()
+        print("#SHOT %%d %%d %%d" %% (img.width(), img.height(), n3))
+        i = 0; step = 4800
+        while i < n3:
+            q = i + step
+            if q > n3: q = n3
+            print(binascii.b2a_base64(fb[i:q]).decode().strip())
+            i = q
+        print("#SHOTEND")
+        continue
+    s.compress(quality=55)
+    n2 = s.size(); jb = s.bytearray()
+    print("#FS %%d %%d %%d" %% (n2, c.exposure_us(), mx))
+    i = 0; step = 2400
+    while i < n2:
+        q = i + step
+        if q > n2: q = n2
+        print(binascii.b2a_base64(jb[i:q]).decode().strip())
+        i = q
+    print("#FE")
+    time.sleep_ms(30)

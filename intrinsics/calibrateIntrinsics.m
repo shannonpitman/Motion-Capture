@@ -1,18 +1,17 @@
-% calibrateIntrinsics.m - Shannon Pitman
-% Checkerboard intrinsic calibration for one OpenMV RT1062 camera.
-% Put the .pgm frames in intrinsics/images/camN, set SQUARE_MM, run.
+% Checkerboard intrinsic calibration for OpenMV RT1062 camera
+% set SQUARE_MM run.
 
 clear; clc; close all;
 
-CAM_ID      = 2;
-SQUARE_MM   = 40.0;   % measure across >=10 squares and divide - see README
-MAX_ERR_PX  = 0.5;    % drop any image whose mean reprojection error exceeds this
-MIN_IMAGES  = 12;     % never prune below this many
-NUM_RADIAL  = 3;      % 2 or 3
+CAM_ID = 2;
+SQUARE_MM = 40.0; % checkerboard square
+MAX_ERR_PX = 0.5;    % drop any image whose mean reprojection error exceeds this
+MIN_IMAGES = 12;     % never prune below this many
+NUM_RADIAL = 3;      % 2 or 3
 EST_TANGENTIAL = true;
 
-here    = fileparts(mfilename('fullpath'));
-imgDir  = fullfile(here, 'images', sprintf('cam%d', CAM_ID));
+here = fileparts(mfilename('fullpath'));
+imgDir = fullfile(here, 'images', sprintf('cam%d', CAM_ID));
 outFile = fullfile(here, sprintf('intrinsics_cam%d.mat', CAM_ID));
 
 d = [dir(fullfile(imgDir,'*.pgm')); dir(fullfile(imgDir,'*.bmp')); dir(fullfile(imgDir,'*.png'))];
@@ -23,17 +22,15 @@ fprintf('%d images found in %s\n', numel(files), imgDir);
 %% Detect corners
 [imagePoints, boardSize, used] = detectCheckerboardPoints(files);
 files = files(used);
-fprintf('Board detected in %d/%d images, boardSize = [%d %d] (%d corners)\n', ...
-    numel(files), numel(d), boardSize(1), boardSize(2), prod(boardSize-1));
+fprintf('Board detected in %d/%d images, boardSize = [%d %d] (%d corners)\n', numel(files), numel(d), boardSize(1), boardSize(2), prod(boardSize-1));
 assert(numel(files) >= MIN_IMAGES, 'Too few usable images.');
 
 worldPoints = generateCheckerboardPoints(boardSize, SQUARE_MM);
 I = imread(files{1});
 imageSize = [size(I,1) size(I,2)];
 
-% The tracker reports centroids in SENSOR pixels (2592x1944). Intrinsics are
-% only valid in the pixel frame they were measured in, so warn loudly if these
-% frames are downscaled - fx, fy, cx, cy then need scaling before use.
+% The tracker reports centroids in SENSOR pixels (2592x1944). Check no
+% downscaling happened
 SENSOR = [1944 2592];
 ratio  = SENSOR(2) / imageSize(2);
 if abs(ratio - 1) > 0.01
