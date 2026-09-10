@@ -572,6 +572,27 @@ observed n = 1.88 exactly. The repeat is the only thing that separates them.
 Run 3 repeat: 126458 us vs 131282 us opening (-3.7%, inside the 3.2% placement
 repeatability). No droop, so the exponent stood.
 
+### Flat-field / vignetting method
+
+These cameras see only IR, so the flat field has to be actively lit, and the
+torch's own beam profile will otherwise be measured as if it were vignetting.
+
+1. **Linearise first.** Run the wide exposure ladder and get `g` BEFORE the
+   flat field. Vignetting read off gamma-encoded pixels is badly understated:
+   a true 70% edge illumination reads as `0.70^0.405 = 0.87`, so the datasheet
+   value would look like mild falloff. Convert every frame as `DN^(1/g)`
+   before fitting the radial profile.
+2. **Roll the camera, don't just move the torch.** Vignetting is fixed to the
+   sensor; the torch pattern is fixed to the wall. Take frames at 0/90/180/270
+   degrees of camera roll on the same wall patch - the vignetting stays put
+   while the illumination pattern rotates, so averaging cancels the azimuthal
+   part of the torch beam. Moving the torch alone cannot separate the two.
+3. Wall must fill the frame, exposure unsaturated (check `sat = 0`), and the
+   torch well off-axis so its hotspot is not centred on the optical axis.
+4. This measures lens vignetting AND the fitted filter together. Separating
+   them needs a frame with the filter removed, which is invasive - probably
+   not worth it unless the total is large.
+
 ### Pixel values are GAMMA-ENCODED, not linear in photons
 
 Two wide-range servo climbs in run 3 give `peak ~ E^g` with g = 0.465 (1 m,
