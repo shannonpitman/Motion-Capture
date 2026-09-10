@@ -463,6 +463,41 @@ which shows the stack is dominated by scene lighting. **Test it properly:** fill
 the frame with a blank, evenly lit wall and measure the radial profile. The
 datasheet claims >70% relative illumination.
 
+### Skew, and why the reported standard errors are optimistic
+
+Keep `'EstimateSkew', false`. Skew (the K(1,2) term) models the sensor's row and
+column axes not being perpendicular. On a lithographed photosite grid that is
+zero by construction - it was a real parameter only in the frame-grabber era,
+when an analog sampling clock unsynchronised to the pixel clock sheared the
+digitised image.
+
+Tested on cam2 run 1 anyway, because this camera had its sensor removed and
+re-seated to fit the IR filter:
+
+  skew estimated                +2.18 px, implying 0.054 deg out of square
+  RMS improvement               0.0038 px (0.50%)
+  naive per-point standard err  +/-0.38 px  -> 5.7 sigma, F-test p ~ 0
+  view-level bootstrap          +/-2.86 px  -> 0.4 sigma, 95% CI -3.2 to +5.9
+
+**The confidence interval contains zero: skew is not resolved.** Freeing it moves
+fx by ~1 px and cx by ~1.4 px - more than their own quoted uncertainty - to fit
+a term that is physically zero.
+
+**Why the naive error bar was 7.5x too small, and what it means generally.**
+It treats 1674 corner measurements as independent when they are really 31
+correlated views: rolling-shutter shear tilts every corner in a view together,
+so residuals are strongly correlated within a view. The same defect that
+inflates RMS therefore also manufactures statistical significance.
+
+This applies to EVERY standard error the calibration reports, not just skew.
+On this data `estimationErrors` gave fx +/-1.2 while random half-splits gave
++/-6 - the same ~5x optimism. **Quote resampled uncertainties (bootstrap or
+split-half over IMAGES), not the covariance-derived ones.**
+
+A prediction worth checking once the board is braced: if shear is the cause,
+the fitted skew should collapse toward zero and the bootstrap spread should
+shrink markedly.
+
 ### Sequencing
 
 Intrinsics depend on **focus**; extrinsics depend on **camera pose**. Intrinsics
