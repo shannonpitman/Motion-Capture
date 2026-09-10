@@ -572,6 +572,29 @@ observed n = 1.88 exactly. The repeat is the only thing that separates them.
 Run 3 repeat: 126458 us vs 131282 us opening (-3.7%, inside the 3.2% placement
 repeatability). No droop, so the exponent stood.
 
+### Pixel values are GAMMA-ENCODED, not linear in photons
+
+Two wide-range servo climbs in run 3 give `peak ~ E^g` with g = 0.465 (1 m,
+1.49x exposure span) and g = 0.344 (8 m, 1.33x span), i.e. 1/g ~ 2.5, close to
+an sRGB 2.2. Narrow climbs (3-5% span) are quantisation noise - ignore them.
+**Needs a deliberate wide exposure ladder at fixed geometry to pin down.**
+
+What this does and does not affect:
+
+- **Does not affect run 3's exponents.** Every row is servo'd to the same peak,
+  so any monotonic transfer function cancels in the exposure ratios.
+- **Does invalidate deriving the detection floor from linearity.** Assuming
+  linear gives `E_min/E_210 = 80/210 = 0.38`; with gamma it is 0.09; the
+  6-px `find_blobs` rule pushes it back up by an unknown amount. Two large
+  corrections in opposite directions, so **measure it, never derive it**.
+  `measureRowVGA.py` now ramps down to the failure point and bisects,
+  reporting `expmin` (col T) and `ratio` (col U).
+- **`fill` and `lobe` are not physical brightness ratios**, since both are
+  ratios of gamma-encoded counts.
+- **Intensity-weighted centroids weight gamma-encoded counts.** Harmless for a
+  symmetric spot - symmetry is preserved, so no bias - but any asymmetry
+  (vignetting gradient across the spot, occlusion, smear) is mis-weighted.
+
 ### Exposure is not the limit - motion smear is
 
 At 8 m, 90 deg the XL needs 250 ms for peak 210 and 95 ms for bare detection
