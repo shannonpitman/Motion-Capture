@@ -111,9 +111,92 @@ distortion terms for every image.
   means a bad frame slipped through.
 - The undistorted montage: straight edges in the scene must be straight.
 
-## Important
+## Important - which pixel frame the intrinsics are in
 
-Calibrate at the same 1:1 VGA readout the tracker uses. Intrinsics are in
-pixels, so they are only valid for the resolution they were measured at - which
-is exactly why `MAX_RATIO = 1.0` is pinned in `kalmanFilter.py`. Do all three
-cameras separately; do not share one set of intrinsics across cams.
+Intrinsics are in pixels, so they are only valid for the frame they were
+measured in. There are two options and they are NOT interchangeable:
+
+| capture | output | readout ratio | intrinsics are in |
+|---|---|---|---|
+| `FULL_RES = True` (`WQXGA2`) | 2592x1944 | **1.000** | sensor pixels |
+| `FULL_RES = False` (`VGA`) | 640x480 | **4.050** | downscaled pixels |
+
+`framesize(csi.VGA)` on its own is **not** a 1:1 crop of the sensor - it is the
+full sensor FOV downscaled by 4.050. (An actual 1:1 VGA crop would see only the
+central 25% x 25% of the field, which would leave k1-k3 fitted to nothing.)
+
+`kalmanFilter.py` reports centroids in **sensor pixels** - it maps every blob
+back with `cx = (b.cxf - W*0.5)*r + SW/2`, and `detection_R` converts variance
+with `R *= ratio*ratio`. So:
+
+- **Capture at `FULL_RES = True`.** The intrinsics land in the tracker's own
+  frame and nothing needs scaling.
+- If you must use VGA, multiply **fx, fy, cx, cy by 4.050** before use. `k` and
+  `p` are in normalised coordinates and do NOT scale.
+
+`calibrateIntrinsics.m` warns if the frames are not sensor-sized, and prints
+the frame and ratio it used. Do all three cameras separately; never share one
+set of intrinsics across cams.
+
+## Board size, and why coverage beats fill
+
+The lens is wide - measured on cam2, f is about 300 px in 640x480 space
+(~1215 sensor px, ~1.7 mm), giving **HFOV ~94 deg**. On a lens this wide a
+small board stays small.
+
+Measured, A3 board with 40 mm squares (9x6 inner corners, 200 x 320 mm inner
+span) at 1 m: the board occupied **70 x 97 px of 640 x 480 - 2.2% of the frame**,
+with corners spanning radius 47-157 px when the frame corner is at 400 px.
+
+That is the failure mode to avoid. **k1, k2 and k3 are constrained only by
+corners far from the principal point.** A board that lives in the middle of the
+frame gives you three radial coefficients fitted to nothing, with plausible
+standard errors, and MATLAB will not complain.
+
+What matters is **where the corners land**, not how much of the frame the board
+fills. A modest board photographed into all nine cells of a 3x3 grid - and
+pushed hard into the four corner cells - samples the radial field properly.
+Filling the frame is a convenience, not the requirement.
+
+Fill fraction is scale-invariant, so capturing at full resolution does NOT help
+here; it improves corner precision (12 px spacing becomes ~49 px), not coverage.
+
+Distances for an A3 / 40 mm board on this lens, from the measured 97 px at 1 m:
+
+| board fills | distance |
+|---|---|
+| 30% of frame height | 0.67 m |
+| 40% | 0.50 m |
+| 50% | 0.40 m |
+| 80% | 0.25 m |
+
+But depth of field bounds this: focused at ~1 m, this lens is sharp from about
+0.5 m to infinity, so **0.5 m is the practical near limit** and ~40% is the most
+fill you will get from A3. That is fine if you cover the corners. If you want
+the full near/mid/far spread with comfortable working distances, print the same
+40 mm pattern at **A1** - then 0.7 / 1.1 / 1.9 m give 68 / 45 / 32%.
+
+## Exposure and gain
+
+**Do not use auto exposure.** It pins at the frame-rate ceiling (21 450 us at
+VGA) and still underexposes - measured mean 52.8, max 161, against a target max
+of 200-240.
+
+Long exposures blur a handheld board, and **blur biases corners inward** - a
+systematic error, not noise. Trade exposure for gain. Measured on cam2 at a
+fixed 8000 us:
+
+| gain | mean | max |
+|---|---|---|
+| 0 dB | 20.4 | 77 |
+| 6 dB | 39.8 | 131 |
+| 12 dB | 73.1 | 198 |
+| 18 dB | 119.8 | 255 |
+
+**12 dB buys a 4.2x shorter exposure** for the same brightness: 8000 us at
+12 dB matches 33 800 us at 0 dB. The cost is about 2x in shot-noise SNR, which
+corner fitting tolerates far better than it tolerates blur.
+
+Watch the vignetting. On a 94 deg lens the frame corners are markedly darker
+than the centre - and the corner placements are exactly the ones you need most.
+Check that boards near the frame edge are still above ~150 max.

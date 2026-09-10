@@ -307,6 +307,77 @@ caps.
 
 ---
 
+## 7a. Intrinsic calibration
+
+Full detail in `intrinsics/README.md`. The points that are easy to get wrong:
+
+### Capture in the tracker's pixel frame
+
+Intrinsics are in pixels and only valid in the frame they were measured in.
+`framesize(csi.VGA)` alone is **not** a 1:1 sensor crop - it is the full sensor
+FOV downscaled by **4.050**. The tracker reports centroids in **sensor** pixels.
+
+So capture at `FULL_RES = True` (`WQXGA2`, 2592x1944, ratio 1.000) and the
+intrinsics land in the tracker's own frame with nothing to rescale. If VGA is
+used instead, fx, fy, cx, cy must be multiplied by 4.050; k and p are
+normalised and do not scale. `calibrateIntrinsics.m` warns if the frames are
+not sensor-sized.
+
+### Coverage beats fill
+
+**k1, k2, k3 are constrained only by corners far from the principal point.** A
+board that stays near frame centre yields three radial coefficients fitted to
+nothing - with plausible-looking standard errors, and no warning from MATLAB.
+
+Measured on cam2: an A3 / 40 mm board at 1 m occupied 2.2% of the frame, with
+corners spanning radius 47-157 px against a frame corner at 400 px - the inner
+39% of the radial field. Unusable for distortion.
+
+What matters is **where the corners land**, not how much of the frame is
+filled. Photograph the board into all nine cells of a 3x3 grid and push it hard
+into the four corner cells. Full-resolution capture does NOT help coverage
+(fill fraction is scale-invariant); it improves corner precision only.
+
+### Lens and depth of field
+
+Measured on cam2: f ~= 300 px in 640x480 space (~1215 sensor px, ~1.7 mm),
+**HFOV ~94 deg**. Hyperfocal is ~0.5 m loose, ~1.0 m strict, so **focused at
+~1 m the lens is sharp from about 0.5 m to infinity**.
+
+That is the important result: **one focus setting serves both the checkerboard
+and the arena.** There is no need to refocus between calibration and the range
+test, which is what would otherwise invalidate the intrinsics (Section 1).
+Verify it rather than assuming - run `focusCheck.py` at ~1.5 m and at 5 m and
+confirm `ew` / `rms_r` are acceptable at both.
+
+### Exposure and gain
+
+**Auto exposure is unusable** - it pins at the frame-rate ceiling (21 450 us at
+VGA) and still underexposes (mean 52.8, max 161 against a 200-240 target).
+Set exposure explicitly.
+
+Long exposure blurs a handheld board and **blur biases corners inward** - a
+systematic error, not noise. Trade exposure for gain: measured at a fixed
+8000 us, gain 0/6/12/18 dB gave max 77/131/198/255, so **12 dB buys a 4.2x
+shorter exposure** (8000 us at 12 dB == 33 800 us at 0 dB). Costs ~2x in
+shot-noise SNR, which corner fitting tolerates far better than blur.
+
+On a 94 deg lens the frame corners vignette noticeably, and those are exactly
+the placements that matter most. Check boards near the frame edge still reach
+~150 max.
+
+### Sequencing
+
+Intrinsics depend on **focus**; extrinsics depend on **camera pose**. Intrinsics
+survive the camera being moved, extrinsics do not. So:
+
+    focus -> lock -> intrinsics -> range test -> extrinsics
+
+Capture extrinsics **last**, after the physically disruptive work in the arena
+is finished. Doing them first and then working around the rig invalidates them
+silently. Note that a single camera can only give intrinsics - extrinsics needs
+the second camera in place, or a known-geometry world target.
+
 ## 8. Known open items
 
 - `QQVGA` rung never characterised; `R` has no framesize term.

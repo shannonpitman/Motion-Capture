@@ -4,8 +4,8 @@
 
 clear; clc; close all;
 
-CAM_ID      = 1;
-SQUARE_MM   = 25.0;   % measure across >=10 squares and divide - see README
+CAM_ID      = 2;
+SQUARE_MM   = 40.0;   % measure across >=10 squares and divide - see README
 MAX_ERR_PX  = 0.5;    % drop any image whose mean reprojection error exceeds this
 MIN_IMAGES  = 12;     % never prune below this many
 NUM_RADIAL  = 3;      % 2 or 3
@@ -30,6 +30,20 @@ assert(numel(files) >= MIN_IMAGES, 'Too few usable images.');
 worldPoints = generateCheckerboardPoints(boardSize, SQUARE_MM);
 I = imread(files{1});
 imageSize = [size(I,1) size(I,2)];
+
+% The tracker reports centroids in SENSOR pixels (2592x1944). Intrinsics are
+% only valid in the pixel frame they were measured in, so warn loudly if these
+% frames are downscaled - fx, fy, cx, cy then need scaling before use.
+SENSOR = [1944 2592];
+ratio  = SENSOR(2) / imageSize(2);
+if abs(ratio - 1) > 0.01
+    warning(['Frames are %dx%d, i.e. the sensor DOWNSCALED by %.3f.\n' ...
+             'These intrinsics are in image pixels, NOT sensor pixels.\n' ...
+             'Multiply fx, fy, cx, cy by %.3f before use with kalmanFilter.py.\n' ...
+             'k and p are normalised and do not scale.\n' ...
+             'Recapture with FULL_RES = true in captureCalib.py to avoid this.'], ...
+            imageSize(2), imageSize(1), ratio, ratio);
+end
 
 %% Estimate + prune outliers
 for pass = 1:4
@@ -60,6 +74,9 @@ fprintf('cx, cy             : %.2f +/- %.2f , %.2f +/- %.2f px\n', ...
     pp(2), estErrors.IntrinsicsErrors.PrincipalPointError(2));
 fprintf('radial   k         : %s\n', mat2str(params.RadialDistortion, 5));
 fprintf('tangential p       : %s\n', mat2str(params.TangentialDistortion, 5));
+fprintf('pixel frame        : %dx%d, sensor ratio %.3f%s\n', ...
+    imageSize(2), imageSize(1), ratio, ...
+    string(repmat(' (SENSOR PIXELS - no scaling needed)',1,abs(ratio-1)<=0.01)));
 fprintf('FOV (h, v)         : %.1f deg , %.1f deg\n', ...
     2*atand(imageSize(2)/(2*fl(1))), 2*atand(imageSize(1)/(2*fl(2))));
 
