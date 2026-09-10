@@ -510,6 +510,90 @@ is finished. Doing them first and then working around the rig invalidates them
 silently. Note that a single camera can only give intrinsics - extrinsics needs
 the second camera in place, or a known-geometry world target.
 
+## 7b. Range measurement (Test C), from run 3
+
+### Select blobs by PEAK, never by area
+
+A reflection is dimmer than the direct path but **more spread out**, so
+`max(blobs, key=pixels)` locks onto the reflection at the long exposures a
+range sweep uses. Measured in the corridor at 120 ms:
+
+| | pixels | peak |
+|---|---|---|
+| wall reflection | 463 | 157 |
+| marker | 325 | 204 |
+
+The area rule picks the wrong one, silently, with no error. Energy is always
+lost on reflection, so peak is the safe discriminator. `measureRowVGA.py`,
+`focus.py` and `measureRow.py` now select on peak. Run-2 arena rows had a
+single source and are unaffected.
+
+### Keep the marker at a FIXED sensor position across distances
+
+In run 3 the marker slid from r = 430 px to r = 658 px off-axis as it came
+from 8 m to 1 m, so **radial position was confounded with range**. Off-axis
+illumination falls (cos^4 gives 89% at the 1 m position vs the 8 m one), which
+flattens the measured falloff and corrupts the fitted exponent.
+
+Either re-aim the camera at each distance so the marker stays centred, or
+record the sensor position (the locate line prints it) and correct. Until then
+**do not rank builds on the fitted exponent** - it is partly a map of where the
+marker sat on the sensor. Rank on column S at matched distance.
+
+### Spot size is PSF-limited, not range-limited
+
+Area was flat to +5.2% from 8 m to 2 m where a real object would have grown
+16x. Fitting `observed^2 = PSF^2 + geometric^2`:
+
+- **PSF = 76 px** (this is the instrument, and it is in every camera - all
+  units carry the visible-blocking filter)
+- effective emitter **17.8 mm** behind a 25 mm cap
+
+Consequence for airframe layout: two markers closer than
+`2 x rms_r = 50 px -> ~170 mm at 8 m` **merge into one blob**. That is a
+marker-spacing constraint set by the optics, not by resolution.
+
+### Inverse square breaks below ~2 m
+
+At 1 m the marker becomes resolved and the exponent drops to 1.33 (90 deg) /
+1.38 (0 deg) against 1.90 over 2-8 m. Surface brightness is conserved for a
+resolved source, so peak grows more slowly than flux. This is physics, not
+error - but it means the 1 m point must be excluded from any power-law fit.
+
+Useful side effect: the 1-8 m exposure span is **35x, not the 64x** inverse
+square implies, so auto-exposure has less range to cover than feared.
+
+### Always repeat the first measurement at the end of the session
+
+A supply fading over a long sweep is **indistinguishable in the fit** from a
+real change in exponent: a 15% droop across run 3 would have reproduced the
+observed n = 1.88 exactly. The repeat is the only thing that separates them.
+
+Run 3 repeat: 126458 us vs 131282 us opening (-3.7%, inside the 3.2% placement
+repeatability). No droop, so the exponent stood.
+
+### Exposure is not the limit - motion smear is
+
+At 8 m, 90 deg the XL needs 250 ms for peak 210 and 95 ms for bare detection
+at `THRESH_LO`. The motion budget for <1 px of smear at 8 m is 4 ms per m/s of
+target speed. **That is a 24x shortfall at walking pace.** 12 dB of gain buys
+4.2x and an f/1.4 lens buys 2x; neither closes it. This is the quantitative
+case for strobed drive (Test E), not a preference.
+
+### Supply chemistry changes absolute exposures
+
+Run 3 needed 1.64x the exposure of run 2 at 5 m. A fully-charged 9 V NiMH sits
+at 7.2-8.4 V against a fresh alkaline's 9.5 V, and through a series resistor
+that gap cuts LED current hard. **Only column S transfers between sessions.**
+Record the cell chemistry, not just "fresh".
+
+### `ew` is invalid when the peak clips
+
+Equivalent width is flux/peak; a clamped denominator reads falsely high and
+stops responding to the lens. `focus.py` now counts saturated pixels, prints
+them, and refuses to nominate a best focus from saturated samples. Check
+`sat = 0` before trusting any focus number.
+
 ## 8. Known open items
 
 - `QQVGA` rung never characterised; `R` has no framesize term.
@@ -522,3 +606,17 @@ the second camera in place, or a known-geometry world target.
   at night now that ambient is not.
 - Intrinsics not yet captured, so there is no px-per-mm scale and the
   camera-count decision is still open.
+- **Vignetting still unmeasured directly.** Run 3 infers ~11% falloff between
+  the 8 m and 1 m marker positions from cos^4, but that is a model, not this
+  lens, and it cannot separate lens vignetting from the fitted filter. Needs a
+  blank, evenly lit wall filling the frame and a radial profile. Datasheet
+  claims >70% relative illumination at the corner; if the real curve is steeper
+  than cos^4 the run-3 exponent correction is understated.
+- 5% residual in the run-3 exponent build-up (inverse square + resolution +
+  vignetting predicts 14.58, measured 13.89). Inside placement repeatability,
+  but unexplained.
+- Run 3 was measured in a **corridor, not the arena**. Reflections were in
+  frame (blobs=3 at 8 m) and the marker was not isolated from its surround, so
+  absolute exposures do not transfer. Build ranking should be robust to a
+  common-mode surround term, but a build that spills more light onto its
+  surroundings is flattered by it - which is the wrong direction.
